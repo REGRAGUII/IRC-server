@@ -1,0 +1,5 @@
+understand what's irc
+
+what's sockets
+
+what's a netwrok 
