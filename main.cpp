@@ -54,9 +54,10 @@ int main(int argc, char **argv)
 
     std::cout << "New client connected\n";
 
-    char buffer[1024];
+    char buffer[1024000];
     while(1)
     {
+        memset(buffer, 0, 1024000);
         int bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
         if (bytes_received < 0)
         {
@@ -65,16 +66,18 @@ int main(int argc, char **argv)
         else
         {
             std::cout << "Received from client: " << buffer;
+            memset(buffer, 0, 1024000);
             const char *response = "Message sent correctly\n";
             int bytes_sent = send(client_fd, response, strlen(response), 0);
+            
             if (bytes_sent < 0)
             {
                 perror("send failed");
             }
             else
             {
-            }
                 std::cout << "Sent response to client." << std::endl;
+            }
         }
 
     }
