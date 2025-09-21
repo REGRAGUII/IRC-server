@@ -8,9 +8,9 @@ int main(int argc, char **argv)
         return (1);
     }
     
-    Ircclient irc;
+    IrcServer irc;
     ft_init(irc, argv);
-    bind_and_listen(irc);
+    bind_and_listen_accept(irc);
     // int port = atoi(argv[1]);
     // irc.setport(atoi(argv[1]));
     // irc.setsocket(socket(AF_INET, SOCK_STREAM,0));
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    std::cout << "New client connected\n";
+    // std::cout << "client number" << help << "is connected\n";
 
     char buffer[8192];
     while(1)
@@ -82,6 +82,6 @@ int main(int argc, char **argv)
 
     }
 
-    close(client_fd);
+    // close(client_fd);
     close(irc.getsocket_fd());
 }
