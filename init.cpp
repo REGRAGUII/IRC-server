@@ -24,14 +24,72 @@ void bind_and_listen_accept(IrcServer& irc)
         throw std::runtime_error("listne failed");
 
     std::cout << "serveur listening on port " << irc.getport() << "\n";
+}
 
+
+
+int accept_new_client(IrcServer& irc)
+{
     sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
-    int client_fd = accept(irc.getsocket_fd(), (struct sockaddr *)&client_addr, &client_len);
-    irc.add_client(client_fd);
+    int client_fd = accept(irc.getsocket_fd(),(struct sockaddr *)&client_addr,&client_len);
     if (client_fd < 0)
-    {
         throw std::runtime_error("accept failed");
-        return ;
+
+    std::cout << "New client connected: " << client_fd - 3 << "\n";
+    irc.add_client(client_fd);
+    return client_fd;
+}
+
+void run_server_loop(IrcServer& irc)
+{
+    std::vector<pollfd> fds;
+
+    pollfd server_poll;
+    server_poll.fd = irc.getsocket_fd();
+    server_poll.events = POLLIN;
+    fds.push_back(server_poll);
+
+    while (true)
+    {
+        int activity = poll(fds.data(), fds.size(), -1);
+        if (activity < 0)
+            throw std::runtime_error("poll failed");
+
+        for (size_t i = 0; i < fds.size(); i++)
+        {
+            if (fds[i].revents & POLLIN)
+            {
+                if (fds[i].fd == irc.getsocket_fd())
+                {
+                    int client_fd = accept_new_client(irc);
+                    pollfd client_poll;
+                    client_poll.fd = client_fd;
+                    client_poll.events = POLLIN;
+                    fds.push_back(client_poll);
+                }
+                else
+                {
+                    char buffer[8042];
+                    memset(buffer, 0, 8042);
+                    int bytes_received = recv(fds[i].fd, buffer, 8042 - 1, 0);
+
+                    if (bytes_received <= 0)
+                    {
+                        std::cout << "Client disconnected: " << fds[i].fd << "\n";
+                        close(fds[i].fd);
+                        fds.erase(fds.begin() + i);
+                        i--;
+                    }
+                    else
+                    {
+                        std::cout << "Message from client " << fds[i].fd - 3
+                                  << ": " << buffer << "\n";
+                        std::string response = "Server received: " + std::string(buffer);
+                        send(fds[i].fd, response.c_str(), response.size(), 0);
+                    }
+                }
+            }
+        }
     }
 }

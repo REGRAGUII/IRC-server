@@ -10,7 +10,7 @@
 #include <string.h>
 #include <vector>
 #include <stdexcept>
-
+#include <poll.h>
 
 class SocketData {
     private:
@@ -84,6 +84,8 @@ class IrcServer {
 
 void ft_init(IrcServer& irc, char **argv);
 void bind_and_listen_accept(IrcServer& irc);
+int accept_new_client(IrcServer& irc);
+void run_server_loop(IrcServer& irc);
 
 
 #endif

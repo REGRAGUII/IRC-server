@@ -1,5 +1,1 @@
-understand what's irc
-
-what's sockets
-
-what's a netwrok 
+don't forget to loop inside of send to making sure not having any unwoted characters!
