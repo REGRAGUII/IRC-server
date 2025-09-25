@@ -86,6 +86,7 @@ void ft_init(IrcServer& irc, char **argv);
 void bind_and_listen_accept(IrcServer& irc);
 int accept_new_client(IrcServer& irc);
 void run_server_loop(IrcServer& irc);
+void processMessage(const std::string &message, int clientFd, IrcServer &server);
 
 
 #endif

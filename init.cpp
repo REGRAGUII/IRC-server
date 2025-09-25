@@ -83,13 +83,22 @@ void run_server_loop(IrcServer& irc)
                     }
                     else
                     {
-                        std::cout << "Message from client " << fds[i].fd - 3
-                                  << ": " << buffer << "\n";
-                        std::string response = "Server received: " + std::string(buffer);
-                        send(fds[i].fd, response.c_str(), response.size(), 0);
+                        // std::cout << "Message from client " << fds[i].fd - 3 << ": " << buffer << "\n";
+                        // std::string response = "Server received: " + std::string(buffer);
+                        // send(fds[i].fd, response.c_str(), response.size(), 0);
+                        processMessage();
                     }
                 }
             }
         }
+    }
+}
+
+void processMessage(const std::string &message, int clientFd, IrcServer &server)
+{
+    if(message.find("hello") != std::string::npos)
+    {
+        std::string botRespose = "Bot : hey this IRC Bot can i help you ?";
+        send(clientFd, botRespose.c_str(), botRespose.size(),0);
     }
 }
