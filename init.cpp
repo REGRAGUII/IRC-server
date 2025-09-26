@@ -93,7 +93,15 @@ void run_server_loop(IrcServer& irc)
         }
     }
 }
-
+std::string getCurrentTime()
+{
+    time_t now = time(0);
+    char *timeStr = ctime(&now);
+    std::string rslt(timeStr);
+    if(!rslt.empty() && rslt[rslt.length()-1] == '\n')
+        rslt.erase(rslt.length()-1);
+    return rslt;
+}
 void processMessage(const std::string &message, int clientFd, IrcServer &server)
 {
     (void)server;
@@ -113,7 +121,7 @@ void processMessage(const std::string &message, int clientFd, IrcServer &server)
         }
         else if(message.find("!time") != std::string::npos)
         {
-            botResponse = "Bot : Current time feature coming soon!\n";
+            botResponse = "Bot : Current time " + getCurrentTime();
             send(clientFd, botResponse.c_str(), botResponse.size(), 0);
         } 
         else

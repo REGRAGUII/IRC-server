@@ -11,6 +11,7 @@
 #include <vector>
 #include <stdexcept>
 #include <poll.h>
+#include <ctime>
 
 class SocketData {
     private:
