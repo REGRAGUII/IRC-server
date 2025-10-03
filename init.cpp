@@ -35,7 +35,7 @@ int accept_new_client(IrcServer& irc)
     int client_fd = accept(irc.getsocket_fd(),(struct sockaddr *)&client_addr,&client_len);
     if (client_fd < 0)
         throw std::runtime_error("accept failed");
-
+    
     std::cout << "New client connected: " << client_fd - 3 << "\n";
     irc.add_client(client_fd);
     return client_fd;
@@ -44,6 +44,7 @@ int accept_new_client(IrcServer& irc)
 void run_server_loop(IrcServer& irc)
 {
     std::vector<pollfd> fds;
+    cmd cmd;
 
     pollfd server_poll;
     server_poll.fd = irc.getsocket_fd();
@@ -71,25 +72,41 @@ void run_server_loop(IrcServer& irc)
                 else
                 {
                     char buffer[8042];
-                    memset(buffer, 0, 8042);
-                    int bytes_received = recv(fds[i].fd, buffer, 8042 - 1, 0);
+                    memset(buffer, 0, sizeof(buffer));
+                    int bytes_received = recv(fds[i].fd, buffer, sizeof(buffer), 0);
 
                     if (bytes_received <= 0)
                     {
                         std::cout << "Client disconnected: " << fds[i].fd << "\n";
                         close(fds[i].fd);
+                        irc.remove_client(fds[i].fd);
                         fds.erase(fds.begin() + i);
                         i--;
                     }
                     else
                     {
-                        std::cout << "Message from client " << fds[i].fd - 3
-                                  << ": " << buffer << "\n";
-                        std::string response = "Server received: " + std::string(buffer);
-                        send(fds[i].fd, response.c_str(), response.size(), 0);
-                    }
+ 
+                            IrcClient* client = irc.getClient(fds[i].fd);
+                            client->Buffering(std::string(buffer));
+                            std::string line;
+                            while(client->ExtractLine(line))
+                            {
+                                cmd = ft_parse(buffer);
+                                HandleCommand(*client, cmd, irc);
+                                // std::cout << cmd.c << std::endl ;
+                                // std::cout << cmd.prefix << std::endl ;
+                            // 
+                            //  for (size_t i = 0; i < cmd.args.size(); i++)
+                            // {
+                                    // std::cout << cmd.args[i] << std::endl;
+                            // }
+                            }
+                      
+        
                 }
             }
         }
     }
 }
+}
+
