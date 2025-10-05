@@ -104,62 +104,9 @@ std::string getCurrentTime()
 }
 void processMessage(const std::string &message, int clientFd, IrcServer &server)
 {
-    (void)server;
-    std::string botResponse;
-
-    if(message[0] == '!')
+    if(message.find("hello") != std::string::npos)
     {
-        if(message.find("!hello") != std::string::npos)
-        {
-            botResponse = "Bot : hey this IRC Bot can i help you ?\n";
-            send(clientFd, botResponse.c_str(), botResponse.size(),0);
-        }
-        else if(message.find("!help") != std::string::npos)
-        {
-            botResponse = "Bot : Available commands: !hello, !help, !time,\n";
-            send(clientFd, botResponse.c_str(), botResponse.size(), 0);
-        }
-        else if(message.find("!time") != std::string::npos)
-        {
-            botResponse = "Bot : Current time " + getCurrentTime();
-            send(clientFd, botResponse.c_str(), botResponse.size(), 0);
-        } 
-        else
-        {
-            botResponse = "Bot : invalid commande try <!help> to see all commandes\n";
-            send(clientFd, botResponse.c_str(), botResponse.size(), 0);
-        }
+        std::string botRespose = "Bot : hey this IRC Bot can i help you ?";
+        send(clientFd, botRespose.c_str(), botRespose.size(),0);
     }
-    else if(message[0] == '/')
-    {
-        if(message.find("/send") != std::string::npos)
-        {
-            botResponse = "start file transfer\n";
-            send(clientFd, botResponse.c_str(), botResponse.size(),  0);
-            // i have to start the file transfer logic here
-        }
-        else if(message.find("/accept") != std::string::npos)
-        {
-            botResponse = "file transfer accepted\n";
-            send(clientFd, botResponse.c_str(), botResponse.size(), 0);
-        }
-        else if(message.find("/decline") != std::string::npos)
-        {
-            botResponse = "file transfer declined\n";
-            send(clientFd, botResponse.c_str(), botResponse.size(), 0);
-        }
-        else
-        {
-            botResponse = "invalid file command\n";
-            send(clientFd, botResponse.c_str(), botResponse.size(), 0);
-        }
-
-    }
-    else
-    {
-        std::cout << "Message from client " << clientFd << ": " << message << "\n";
-        std::string response = "Server received: " + message;
-        send(clientFd, response.c_str(), response.size(), 0);
-    }
-    
 }
