@@ -5,25 +5,25 @@
 // void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
 //     if (client.isAuthenticated()) {
 //         server.sendToClient(client, ":ircserv 462 " + client.getNick() +
-//             " :You may not reregister\r\n"); 
+//             " :You may not reregister\r\n");
 //         return;
 //     }
 //     if (args.empty()) {
-//         server.sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n"); 
+//         server.sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
 //         return;
 //     }
 //     if (args[0] == server.getPassword()) {
 //         client.setPassOk(true);
 //     } else {
-//         server.sendToClient(client, ":ircserv 464 * :Password incorrect\r\n"); 
-      
+//         server.sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
+
 //     }
 //     client.tryAuthenticate();
 // }
 
 // // NICK <nickname>
 // void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {    if (args.empty()) {
-//         server.sendToClient(client, ":ircserv 431 * :No nickname given\r\n"); 
+//         server.sendToClient(client, ":ircserv 431 * :No nickname given\r\n");
 //         return;
 //     }
 //     std::string nick = args[0];
@@ -39,7 +39,7 @@
 // void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
 //     if (client.hasUser()) {
 //         server.sendToClient(client, ":ircserv 462 " + client.getNick() +
-//             " :You may not reregister\r\n"); 
+//             " :You may not reregister\r\n");
 //         return;
 //     }
 //     if (args.size() < 4) {
@@ -48,7 +48,7 @@
 //         return;
 //     }
 //     std::string username = args[0];
-//     std::string realname = args[3]; 
+//     std::string realname = args[3];
 //     client.setUser(username, realname);
 //     client.tryAuthenticate();
 // }
@@ -64,7 +64,7 @@ cmd ft_parse(const std::string& msg)
 
     if(command.size() >= 2 && command.substr(command.size() - 2) == "\r\n")
         command = command.substr(0, command.size() - 2);
-    
+
     std::istringstream ss(command);
     std::string tk;
 
@@ -83,7 +83,7 @@ cmd ft_parse(const std::string& msg)
 
             trail +=rest;
             cmd.args.push_back(trail);
-            break; 
+            break;
         }
         else
         {
@@ -93,7 +93,7 @@ cmd ft_parse(const std::string& msg)
     return cmd;
 }
 
-void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc){
+void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot bot){
     if(command.c== "NICK")
         handleNick(irc, client, command.args);
     else if (command.c == "PASS")
@@ -101,4 +101,10 @@ void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc){
     else if (command.c == "USERNAME")
         handleUser(irc, client, command.args);
         //add the bot command here
+    else if(command.c == "BOT")
+        bot.handelBotCommnads(irc, client, command.args);
+    else if(command.c[0] == '/')
+    {
+
+    }
 }
