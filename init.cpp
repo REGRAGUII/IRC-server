@@ -36,7 +36,6 @@ int accept_new_client(IrcServer& irc)
     if (client_fd < 0)
         throw std::runtime_error("accept failed");
 
-
     std::cout << "New client connected: " << client_fd - 3 << "\n";
     irc.add_client(client_fd);
     return client_fd;
@@ -47,7 +46,6 @@ void run_server_loop(IrcServer& irc)
     std::vector<pollfd> fds;
     cmd cmd;
     Bot bot;
-
     pollfd server_poll;
     server_poll.fd = irc.getsocket_fd();
     server_poll.events = POLLIN;
@@ -74,13 +72,14 @@ void run_server_loop(IrcServer& irc)
                 else
                 {
                     char buffer[8042];
-                    memset(buffer, 0, 8042);
-                    int bytes_received = recv(fds[i].fd, buffer, 8042 - 1, 0);
+                    memset(buffer, 0, sizeof(buffer));
+                    int bytes_received = recv(fds[i].fd, buffer, sizeof(buffer), 0);
 
                     if (bytes_received <= 0)
                     {
                         std::cout << "Client disconnected: " << fds[i].fd << "\n";
                         close(fds[i].fd);
+                        irc.remove_client(fds[i].fd);
                         fds.erase(fds.begin() + i);
                         i--;
                     }
@@ -104,13 +103,10 @@ void run_server_loop(IrcServer& irc)
                             }
 
 
-                        // std::cout << "Message from client " << fds[i].fd - 3 << ": " << buffer << "\n";
-                        // std::string response = "Server received: " + std::string(buffer);
-                        // send(fds[i].fd, response.c_str(), response.size(), 0);
-                        processMessage(buffer,fds[i].fd, irc);
-                    }
                 }
             }
         }
     }
 }
+}
+
