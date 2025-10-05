@@ -11,9 +11,6 @@
 #include <vector>
 #include <stdexcept>
 #include <poll.h>
-<<<<<<< HEAD
-#include <ctime>
-=======
 #include <sstream>
 #include <map>
 
@@ -24,7 +21,6 @@ struct cmd{
     std::vector<std::string> args;
 };
 
->>>>>>> hamza
 
 class SocketData {
     private:
@@ -209,7 +205,6 @@ void ft_init(IrcServer& irc, char **argv);
 void bind_and_listen_accept(IrcServer& irc);
 int accept_new_client(IrcServer& irc);
 void run_server_loop(IrcServer& irc);
-void processMessage(const std::string &message, int clientFd, IrcServer &server);
 
 void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot);
 cmd ft_parse(const std::string& msg);
