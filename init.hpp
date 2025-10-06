@@ -135,45 +135,46 @@ class IrcServer {
 class Bot
 {
     private :
-        std::string Name;
-        std::string Nick;
-        IrcServer *serverRef;
+        std::string botName;
+        // IrcServer *serverRef;
     public :
+        Bot() : botName("BOT") {}
         void handelBotCommnads(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
         {
             std::string response;
 
             if(args.empty())
             {
-                response = "BOT : Please specify a commnade, try BOT help\n";
+                response = botName + " : Please specify a commnade, try BOT help\n";
                 send(client.getClient(), response.c_str(), response.size(), 0);
                 return;
             }
             std::string botCommand = args[0];
             if(botCommand == "help")
             {
-
-            }
-            else if(botCommand == "time")
-            {
-                response = "BOT current time : " + getCurrentTime();
+                response = botName + " : Available commands : help, hello, echo, time\n";
                 send(client.getClient(), response.c_str(), response.size(), 0);
             }
             else if(botCommand == "hello")
             {
-
+                response = botName + " : Hey this is IRC bot, can i help you!\n";
             }
             else if(botCommand == "echo" && args.size() > 1)
             {
-                std::string msg = "BOT : ";
+                std::string msg = botName + " : ";
                 for(size_t i = 1; i < args.size(); i++)
                     msg += args[i] + " ";
                 msg += '\n';
                 send(client.getClient(), response.c_str(), response.size(),0);
             }
+            else if(botCommand == "time")
+            {
+                response = botName + " : Current time : " + getCurrentTime();
+                send(client.getClient(), response.c_str(), response.size(), 0);
+            }
             else
             {
-                response = "BOT : Unknown command, try BOT help\n";
+                response = botName + " : Unknown command, try BOT help\n";
                 send(client.getClient(), response.c_str(), response.size(), 0);
             }
 
@@ -194,11 +195,53 @@ class fileTransfer
     private :
         int senderFd;
         int receiverFd;
-        std::vector<char> fileData;
+        std::vector<std::string> validCommands;
     public :
-        void startTransfer();
-        void sendChunk();
-        bool isComplete();
+        fileTransfer()
+        {
+            senderFd = -1;
+            receiverFd = -1;
+            validCommands.push_back("/send");
+            validCommands.push_back("/accept");
+            validCommands.push_back("/decline");
+            validCommands.push_back("/recieve");
+        }
+        bool isFileTransferCmd(const std::string &cmd) 
+        {
+            for(size_t i = 0; i < validCommands.size(); i++)
+            {
+                if(cmd == validCommands[i])
+                    return true;
+            }
+            return false;
+        }
+        void handelfileTransferCmd(IrcServer &irc ,IrcClient &client, cmd command)
+        {
+            if(command.c == "/send")
+            {
+                handelSend(irc, client, command.args);
+            }
+            else if(command.c == "/accept")
+            {
+                handelAccept(irc, client, command.args);
+            }
+            else if(command.c == "/decline")
+            {
+                handelDecline(irc, client, command.args);
+            }
+            else if(command.c == "/receive")
+            {
+                handelRecieve(irc, client, command.args);
+            }
+        };
+        // void startTransfer();
+        // void sendChunk();
+        // bool isComplete();
+    private :
+        void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
+        void handelAccept(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
+        void handelDecline(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
+        void handelRecieve(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
 };
 
 void ft_init(IrcServer& irc, char **argv);
@@ -208,6 +251,8 @@ void run_server_loop(IrcServer& irc);
 
 void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot);
 cmd ft_parse(const std::string& msg);
+
+
 
 #endif
 

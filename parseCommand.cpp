@@ -103,8 +103,9 @@ void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot bo
         //add the bot command here
     else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
-    else if(command.c[0] == '/')
-    {
+    else if(isFileTransferCmd(command.c))
+        fileTransfer.handelfileTransferCmd(irc, client, command);
+    else
+        std::cout << "Unkown commande :" << command.c;
 
-    }
 }
