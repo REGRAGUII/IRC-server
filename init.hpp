@@ -56,10 +56,11 @@ private:
     std::string _realname;
     bool _passAccepted;
     bool _registered;
+    bool _Authenticated;
 
 public:
     IrcClient() : client_fd(-1), _passAccepted(false), _registered(false) {}
-    IrcClient(int fd) :client_fd(fd), _passAccepted(false), _registered(false){}
+    IrcClient(int fd) :client_fd(fd), _passAccepted(false), _registered(false) {}
     int getClient() const { return client_fd; }
     void Buffering(const std::string& add){ _buffer += add;}
     void sendMessage(const std::string& msg){
@@ -85,7 +86,9 @@ public:
     const std::string getRealname() const {return _realname;}
     bool hasPass() const { return _passAccepted; }
     bool isRegistered() const { return _registered; }
-
+    void tryAuthenticate(){
+        if( _passAccepted && _nick) _registered = true;
+    };
 };
 
 class IrcServer {
@@ -124,6 +127,14 @@ class IrcServer {
             if (it != clients.end()) clients.erase(it);
         }
 
+        bool isNickTaken(std::string nick) const {
+            std::map<int, IrcClient>::const_iterator it = clients.begin();
+            for (; it != clients.end(); it++)
+            {
+                if( it->second.getNick() == nick) return true;
+            }
+            return false;
+        }
 
         ~IrcServer() {
         // for (size_t i = 0; i < clients.size(); ++i)

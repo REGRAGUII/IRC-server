@@ -21,19 +21,19 @@
 //     client.tryAuthenticate();
 // }
 
-// // NICK <nickname>
-// void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {    if (args.empty()) {
-//         server.sendToClient(client, ":ircserv 431 * :No nickname given\r\n"); 
-//         return;
-//     }
-//     std::string nick = args[0];
-//     if (server.isNickTaken(nick)) {
-//         server.sendToClient(client, ":ircserv 433 * " + nick + " :Nickname is already in use\r\n");
-//         return;
-//     }
-//     client.setNick(nick);
-//     client.tryAuthenticate();
-// }
+// NICK <nickname>
+void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {    if (args.empty()) {
+        client.sendMessage(":ircserv 431 * :No nickname given\r\n"); 
+        return;
+    }
+    std::string nick = args[0];
+    if (server.isNickTaken(nick)) {
+        client.sendMessage(":ircserv 433 * " + client.getNick() + " :Nickname is already in use\r\n");
+        return;
+    }
+    client.setNick(nick);
+    client.tryAuthenticate();
+}
 
 // // USER <username> <mode> <unused> :<realname>
 // void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
@@ -96,9 +96,9 @@ cmd ft_parse(const std::string& msg)
 void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc){
     if(command.c== "NICK")
         handleNick(irc, client, command.args);
-    else if (command.c == "PASS")
-        handlePass(irc, client, command.args);
-    else if (command.c == "USERNAME")
-        handleUser(irc, client, command.args);
+    // else if (command.c == "PASS")
+    //     handlePass(irc, client, command.args);
+    // else if (command.c == "USERNAME")
+    //     handleUser(irc, client, command.args);
         //add the bot command here
 }
