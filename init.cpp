@@ -35,7 +35,7 @@ int accept_new_client(IrcServer& irc)
     int client_fd = accept(irc.getsocket_fd(),(struct sockaddr *)&client_addr,&client_len);
     if (client_fd < 0)
         throw std::runtime_error("accept failed");
-    
+
     std::cout << "New client connected: " << client_fd - 3 << "\n";
     irc.add_client(client_fd);
     return client_fd;
@@ -45,7 +45,7 @@ void run_server_loop(IrcServer& irc)
 {
     std::vector<pollfd> fds;
     cmd cmd;
-
+    Bot bot;
     pollfd server_poll;
     server_poll.fd = irc.getsocket_fd();
     server_poll.events = POLLIN;
@@ -85,24 +85,24 @@ void run_server_loop(IrcServer& irc)
                     }
                     else
                     {
- 
+
                             IrcClient* client = irc.getClient(fds[i].fd);
                             client->Buffering(std::string(buffer));
                             std::string line;
                             while(client->ExtractLine(line))
                             {
                                 cmd = ft_parse(buffer);
-                                HandleCommand(*client, cmd, irc);
+                                HandleCommand(*client, cmd, irc, bot);
                                 // std::cout << cmd.c << std::endl ;
                                 // std::cout << cmd.prefix << std::endl ;
-                            // 
+                            //
                             //  for (size_t i = 0; i < cmd.args.size(); i++)
                             // {
                                     // std::cout << cmd.args[i] << std::endl;
                             // }
                             }
-                      
-        
+
+
                 }
             }
         }
