@@ -2,6 +2,7 @@
 #define init_hpp
 
 #include <iostream>
+#include <fstream>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -119,6 +120,16 @@ class IrcServer {
         return it == clients.end() ? 0 : &it->second;
         }
 
+        IrcClient *findClientByNick(const std::string nickName)
+        {
+            std::map<int, IrcClient>::iterator it;
+            for(it = clients.begin(); it != clients.end(); ++it)
+            {
+                if(it->second.getNick() == nickName)
+                    return &it->second;
+            }
+            return 0;
+        }
         void remove_client(int client_fd) {
             std::map<int, IrcClient>::iterator it = clients.find(client_fd);
             if (it != clients.end()) clients.erase(it);
@@ -131,180 +142,6 @@ class IrcServer {
         // clients.clear();
         }
     };
-
-class Bot
-{
-    private :
-        std::string botName;
-        // IrcServer *serverRef;
-    public :
-        Bot() : botName("BOT") {}
-        void handelBotCommnads(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
-        {
-            std::string response;
-
-            if(args.empty())
-            {
-                response = botName + " : Please specify a commnade, try BOT help\n";
-                send(client.getClient(), response.c_str(), response.size(), 0);
-                return;
-            }
-            std::string botCommand = args[0];
-            if(botCommand == "help")
-            {
-                response = botName + " : Available commands : help, hello, echo, time\n";
-                send(client.getClient(), response.c_str(), response.size(), 0);
-            }
-            else if(botCommand == "hello")
-            {
-                response = botName + " : Hey this is IRC bot, can i help you!\n";
-            }
-            else if(botCommand == "echo" && args.size() > 1)
-            {
-                std::string msg = botName + " : ";
-                for(size_t i = 1; i < args.size(); i++)
-                    msg += args[i] + " ";
-                msg += '\n';
-                send(client.getClient(), response.c_str(), response.size(),0);
-            }
-            else if(botCommand == "time")
-            {
-                response = botName + " : Current time : " + getCurrentTime();
-                send(client.getClient(), response.c_str(), response.size(), 0);
-            }
-            else
-            {
-                response = botName + " : Unknown command, try BOT help\n";
-                send(client.getClient(), response.c_str(), response.size(), 0);
-            }
-
-        }
-        std::string getCurrentTime()
-        {
-            time_t now = time(0);
-            char *timeStr = ctime(&now);
-            std::string rslt(timeStr);
-            if(!rslt.empty() && rslt[rslt.length()-1] == '\n')
-                rslt.erase(rslt.length()-1);
-            return rslt;
-        }
-};
-
-class fileTransfer
-{    
-    private :
-        // session management
-        struct FileTransferSession
-        {
-            int senderFd;
-            int receiverFd;
-            std::string fileName;
-            std::vector<char> fileData;
-            size_t totalSize;
-            size_t bytesSent;
-            bool isActive;
-        };
-        std::vector<FileTransferSession> pendingTransfers;
-        std::vector<FileTransferSession> activeTransfers;
-        std::vector<std::string> validCommands;
-        // file operations
-        std::vector<char> readBinaryFile(const std::string &fileName) //////
-        {
-    
-        }
-        void saveBinaryFile(const std::string fileName, const std::vector<char> &data) //////
-        {
-    
-        }
-
-    public :
-        fileTransfer()
-        {
-            validCommands.push_back("/send");
-            validCommands.push_back("/accept");
-            validCommands.push_back("/decline");
-            validCommands.push_back("/recieve");
-        }
-
-        bool isFileTransferCmd(const std::string &cmd) 
-        {
-            for(size_t i = 0; i < validCommands.size(); i++)
-            {
-                if(cmd == validCommands[i])
-                    return true;
-            }
-            return false;
-        }
-        // command handlers
-        void handelfileTransferCmd(IrcServer &irc ,IrcClient &client, cmd &command)
-        {
-            if(command.c == "/send")
-            {
-                if(command.args.size() < 2)
-                {
-                    std::string respose = "Usage: /send <recipient> <filename>\n";
-                    send(client.getClient(), respose.c_str(), respose.size(), 0);
-                    return;
-                }
-                handelSend(irc, client, command.args);
-            }
-            else if(command.c == "/accept")
-            {
-                handelAccept(irc, client, command.args);
-            }
-            else if(command.c == "/decline")
-            {
-                handelDecline(irc, client, command.args);
-            }
-            else if(command.c == "/receive")
-            {
-                handelRecieve(irc, client, command.args);
-            }
-        };
-
-        void startTransfer(FileTransferSession &session) ////////
-        {
-
-        }
-
-        void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
-        {
-            if(args.size() < 2)
-            {
-                std::string respose = "Usage: /send <recipient> <filename>\n";
-                send(client.getClient(), respose.c_str(), respose.size(), 0);
-                return;
-            }
-            //////////////////
-        }
-
-        void handelAccept(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
-        {
-            if(args.empty())
-            {
-                // acccept without id 
-            }
-            else
-                std::string transferId = args[0];
-                // accept with specific id
-        }
-
-        void handelDecline(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
-        {
-            if(args.empty())
-                std::cout << "here\n";
-            else
-                std::string transferId = args[0];
-            ////////////////////
-        }
-
-        void handelRecieve(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
-        {
-            std::string fileName = args.empty() ? "recieved file" : args[0];
-            //////////////////
-
-        }
-};
 
 void ft_init(IrcServer& irc, char **argv);
 void bind_and_listen_accept(IrcServer& irc);
