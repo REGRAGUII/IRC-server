@@ -191,21 +191,41 @@ class Bot
 };
 
 class fileTransfer
-{
+{    
     private :
-        int senderFd;
-        int receiverFd;
+        // session management
+        struct FileTransferSession
+        {
+            int senderFd;
+            int receiverFd;
+            std::string fileName;
+            std::vector<char> fileData;
+            size_t totalSize;
+            size_t bytesSent;
+            bool isActive;
+        };
+        std::vector<FileTransferSession> pendingTransfers;
+        std::vector<FileTransferSession> activeTransfers;
         std::vector<std::string> validCommands;
+        // file operations
+        std::vector<char> readBinaryFile(const std::string &fileName) //////
+        {
+    
+        }
+        void saveBinaryFile(const std::string fileName, const std::vector<char> &data) //////
+        {
+    
+        }
+
     public :
         fileTransfer()
         {
-            senderFd = -1;
-            receiverFd = -1;
             validCommands.push_back("/send");
             validCommands.push_back("/accept");
             validCommands.push_back("/decline");
             validCommands.push_back("/recieve");
         }
+
         bool isFileTransferCmd(const std::string &cmd) 
         {
             for(size_t i = 0; i < validCommands.size(); i++)
@@ -215,10 +235,17 @@ class fileTransfer
             }
             return false;
         }
-        void handelfileTransferCmd(IrcServer &irc ,IrcClient &client, cmd command)
+        // command handlers
+        void handelfileTransferCmd(IrcServer &irc ,IrcClient &client, cmd &command)
         {
             if(command.c == "/send")
             {
+                if(command.args.size() < 2)
+                {
+                    std::string respose = "Usage: /send <recipient> <filename>\n";
+                    send(client.getClient(), respose.c_str(), respose.size(), 0);
+                    return;
+                }
                 handelSend(irc, client, command.args);
             }
             else if(command.c == "/accept")
@@ -234,14 +261,49 @@ class fileTransfer
                 handelRecieve(irc, client, command.args);
             }
         };
-        // void startTransfer();
-        // void sendChunk();
-        // bool isComplete();
-    private :
-        void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
-        void handelAccept(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
-        void handelDecline(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
-        void handelRecieve(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
+
+        void startTransfer(FileTransferSession &session) ////////
+        {
+
+        }
+
+        void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
+        {
+            if(args.size() < 2)
+            {
+                std::string respose = "Usage: /send <recipient> <filename>\n";
+                send(client.getClient(), respose.c_str(), respose.size(), 0);
+                return;
+            }
+            //////////////////
+        }
+
+        void handelAccept(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
+        {
+            if(args.empty())
+            {
+                // acccept without id 
+            }
+            else
+                std::string transferId = args[0];
+                // accept with specific id
+        }
+
+        void handelDecline(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
+        {
+            if(args.empty())
+                std::cout << "here\n";
+            else
+                std::string transferId = args[0];
+            ////////////////////
+        }
+
+        void handelRecieve(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
+        {
+            std::string fileName = args.empty() ? "recieved file" : args[0];
+            //////////////////
+
+        }
 };
 
 void ft_init(IrcServer& irc, char **argv);
