@@ -85,9 +85,14 @@ public:
     const std::string getUsername() const {return _username;}
     const std::string getRealname() const {return _realname;}
     bool hasPass() const { return _passAccepted; }
+    bool hasNick() const { return !_nick.empty();}
+    bool hasUser() const { return !_username.empty();}
+
     bool isRegistered() const { return _registered; }
     void tryAuthenticate(){
-        if( _passAccepted && _nick) _registered = true;
+        if (!_registered && (hasNick() && hasUser()) && hasPass()) {
+            _registered = true;
+        }
     };
 };
 
@@ -117,7 +122,7 @@ class IrcServer {
 
         }
 
-         IrcClient* getClient(int id) {
+        IrcClient* getClient(int id) {
         std::map<int, IrcClient>::iterator it = clients.find(id);
         return it == clients.end() ? 0 : &it->second;
         }
@@ -218,6 +223,7 @@ int accept_new_client(IrcServer& irc);
 void run_server_loop(IrcServer& irc);
 
 void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot);
+
 cmd ft_parse(const std::string& msg);
 
 #endif

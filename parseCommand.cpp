@@ -2,27 +2,28 @@
 
 
 // //PASS <password>
-// void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
-//     if (client.isAuthenticated()) {
-//         server.sendToClient(client, ":ircserv 462 " + client.getNick() +
-//             " :You may not reregister\r\n");
-//         return;
-//     }
-//     if (args.empty()) {
-//         server.sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
-//         return;
-//     }
-//     if (args[0] == server.getPassword()) {
-//         client.setPassOk(true);
-//     } else {
-//         server.sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
+void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
+    if (client.isRegistered()) {
+        client.sendMessage(":ircserv 462 " + client.getNick() +
+            " :You may not reregister\r\n");
+        return;
+    }
+    if (args.empty()) {
+        client.sendMessage(":ircserv 461 * PASS :Not enough parameters\r\n");
+        return;
+    }
+    if (args[0] == server.getpassword()) {
+        client.setPassAccepted(true);
+    } else {
+        client.sendMessage(":ircserv 464 * :Password incorrect\r\n");
 
-//     }
-//     client.tryAuthenticate();
-// }
+    }
+    client.tryAuthenticate();
+}
 
 // NICK <nickname>
-void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {    if (args.empty()) {
+void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {    
+    if (args.empty()) {
         client.sendMessage(":ircserv 431 * :No nickname given\r\n"); 
         return;
     }
@@ -36,22 +37,23 @@ void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::str
 }
 
 // // USER <username> <mode> <unused> :<realname>
-// void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
-//     if (client.hasUser()) {
-//         server.sendToClient(client, ":ircserv 462 " + client.getNick() +
-//             " :You may not reregister\r\n");
-//         return;
-//     }
-//     if (args.size() < 4) {
-//         server.sendToClient(client, ":ircserv 461 " + client.getNick() +
-//             " USER :Not enough parameters\r\n");
-//         return;
-//     }
-//     std::string username = args[0];
-//     std::string realname = args[3];
-//     client.setUser(username, realname);
-//     client.tryAuthenticate();
-// }
+void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
+    // if (client.hasUser()) {
+        // client.sendMessage(":ircserv 462 " + client.getNick() +
+            // " :You may not reregister\r\n");
+        //./ return;
+    // }
+    if (args.size() < 4) {
+        client.sendMessage(":ircserv 461 " + client.getNick() +
+            " USER :Not enough parameters\r\n");
+        return;
+    }
+    std::string username = args[0];
+    std::string realname = args[3];
+    client.setUsername(username);
+    client.setRealname(realname);
+    client.tryAuthenticate();
+}
 
 
 
@@ -93,14 +95,13 @@ cmd ft_parse(const std::string& msg)
     return cmd;
 }
 
-void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot bot){
+void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot){
     if(command.c== "NICK")
         handleNick(irc, client, command.args);
-    // else if (command.c == "PASS")
-    //     handlePass(irc, client, command.args);
-    // else if (command.c == "USERNAME")
-    //     handleUser(irc, client, command.args);
-        //add the bot command here
+    else if (command.c == "PASS")
+        handlePass(irc, client, command.args);
+    else if (command.c == "USERNAME")
+        handleUser(irc, client, command.args);
     else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
     else if(command.c[0] == '/')

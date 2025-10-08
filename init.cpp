@@ -91,7 +91,7 @@ void run_server_loop(IrcServer& irc)
                             std::string line;
                             while(client->ExtractLine(line))
                             {
-                                cmd = ft_parse(buffer);
+                                cmd = ft_parse(line);
                                 HandleCommand(*client, cmd, irc, bot);
                                 // std::cout << cmd.c << std::endl ;
                                 // std::cout << cmd.prefix << std::endl ;

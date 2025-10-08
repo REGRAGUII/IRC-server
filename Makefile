@@ -1,12 +1,9 @@
 CXX = c++
-
-CFLAGS = -Wall -Wextra -Werror  -std=c++98
+# CFLAGS = -Wall -W12extra -Werror -std=c++98
 
 SRC = $(wildcard *.cpp)
 OBJ = $(SRC:.cpp=.o)
-
-NAME = ircserv 
-
+NAME = ircserv
 
 all: $(NAME)
 
@@ -17,9 +14,9 @@ $(NAME): $(OBJ)
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) 
+	rm -f $(OBJ)
 
 fclean: clean
 	rm -f $(NAME)
 
-re: fclean all% 
+re: fclean all
