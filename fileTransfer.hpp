@@ -1,7 +1,7 @@
 #include "init.hpp"
 
 class fileTransfer
-{    
+{
     private :
         //// session management
         struct FileTransferSession
@@ -40,7 +40,7 @@ class fileTransfer
 
         void saveBinaryFile(const std::string fileName, const std::vector<char> &data) //////
         {
-    
+
         }
 
     public :
@@ -52,7 +52,7 @@ class fileTransfer
             validCommands.push_back("/recieve");
         }
 
-        bool isFileTransferCmd(const std::string &cmd) 
+        bool isFileTransferCmd(const std::string &cmd)
         {
             for(size_t i = 0; i < validCommands.size(); i++)
             {
@@ -95,10 +95,10 @@ class fileTransfer
             {
                 handelDecline(irc, client, command.args);
             }
-            else if(command.c == "/receive")
-            {
-                handelRecieve(irc, client, command.args);
-            }
+            // else if(command.c == "/receive")
+            // {
+            //     handelRecieve(irc, client, command.args);
+            // }
         };
 
         void startTransfer(FileTransferSession &session)
@@ -176,28 +176,46 @@ class fileTransfer
 
         void handelAccept(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
         {
-            if(args.empty())
+            int clientFd = client.getClient();
+            for(size_t i = 0 ; i < pendingTransfers.size(); i++)
             {
-                // acccept without id 
+                if(pendingTransfers[i].receiverId == clientFd)
+                {
+                    FileTransferSession session = pendingTransfers[i];
+                    std::string response = "file transfer starting...\n";
+                    send(client.getClient(), response.c_str(), response.size(), 0);
+                    send(session.senderId, "Sending file...\n", 16, 0);
+                    startTransfer(session);
+                    pendingTransfers.erase(pendingTransfers.begin() + i);
+                    return;
+                }
             }
-            else
-                std::string transferId = args[0];
-                // accept with specific id
+            std::string response = "no pending file transfer\n";
+            send(clientFd, response.c_str(), response.size(), 0);
         }
 
         void handelDecline(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
         {
-            if(args.empty())
-                std::cout << "here\n";
-            else
-                std::string transferId = args[0];
-            ////////////////////
+            int  clientFd = client.getClient();
+            for(size_t i = 0; i < pendingTransfers.size(); i++)
+            {
+                if(pendingTransfers[i].receiverId == clientFd)
+                {
+                    FileTransferSession session = pendingTransfers[i];
+                    std::string response = "File transfer declined\n";
+                    send(clientFd, response.c_str(), response.size(), 0);
+                    std::string senderMsg = "File transfer declined by recipient\n";
+                    send(session.senderId, senderMsg.c_str(), senderMsg.size(), 0);
+                    pendingTransfers.erase(pendingTransfers.begin() + i);
+                    return;
+                }
+            }
         }
 
-        void handelRecieve(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
-        {
-            std::string fileName = args.empty() ? "recieved file" : args[0];
-            //////////////////
+        // void handelRecieve(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
+        // {
+        //     std::string fileName = args.empty() ? "recieved file" : args[0];
+        //     //////////////////
 
-        }
+        // }
 };
