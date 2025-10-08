@@ -15,8 +15,9 @@
 #include <sstream>
 #include <map>
 #include "bot.hpp"
-#include "fileTransfer.hpp"
 
+
+class fileTransfer;
 struct cmd{
 
     std::string prefix;
@@ -96,9 +97,13 @@ class IrcServer {
         ConnectionData  con_d;
         SocketData      sock_d;
         std::map <int, IrcClient> clients;
+        Bot bot;
+        fileTransfer *fT;
     public:
             // ******      Connection Data      ******
-
+        IrcServer();
+        Bot& getBot() {return bot;}
+        fileTransfer& getFileTransfer() {return *fT;}
         std::string getpassword()const{return con_d.getpassword();}
         int getport()const {return con_d.getport();}
         void setpassword(std::string pwd) {con_d.setpassword(pwd);}
@@ -138,11 +143,12 @@ class IrcServer {
         }
 
 
-        ~IrcServer() {
-        // for (size_t i = 0; i < clients.size(); ++i)
-            // delete clients[i];
-        // clients.clear();
-        }
+        ~IrcServer();
+        // {
+        // // for (size_t i = 0; i < clients.size(); ++i)
+        //     // delete clients[i];
+        // // clients.clear();
+        // }
     };
 
 // class IrcClient {

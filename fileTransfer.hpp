@@ -4,8 +4,10 @@
 #include <string>
 #include <vector>
 #include <sys/socket.h>
-#include "ircCore.hpp"
+// #include "ircCore.hpp"
 
+class IrcServer;  // ✅ forward declare
+class IrcClient;  // ✅ forward declare
 struct cmd;
 
 class fileTransfer
@@ -28,7 +30,7 @@ class fileTransfer
         std::vector<char> readBinaryFile(const std::string &fileName);
 
     public :
-        fileTransfer();
+       fileTransfer();
 
        bool isFileTransferCmd(const std::string &cmd);
 
@@ -37,7 +39,7 @@ class fileTransfer
         std::string buildFileStartHeader(const std::string &fileName, size_t size);
 
         //// command handlers
-        void handelfileTransferCmd(IrcServer &irc ,IrcClient &client, cmd &command);
+        void handelfileTransferCmd(IrcServer &irc ,IrcClient &client,const cmd &command);
         void startTransfer(FileTransferSession &session);
         void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
         void handelAccept(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);

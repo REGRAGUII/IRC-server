@@ -9,6 +9,7 @@ Bot::Bot() : botName("BOT") {}
 
 void Bot::handelBotCommnads(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
 {
+    (void)irc;
     std::string response;
 
     if (args.empty())
@@ -53,7 +54,7 @@ std::string Bot::getCurrentTime()
     time_t now = time(0);
     char *timeStr = ctime(&now);
     std::string result(timeStr);
-    if (!result.empty() && result.back() == '\n')
-        result.pop_back();
+    if (!result.empty() && result[result.size() -1] == '\n')
+        result.erase(result.size() -1);
     return result;
 }

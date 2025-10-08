@@ -45,7 +45,6 @@ void run_server_loop(IrcServer& irc)
 {
     std::vector<pollfd> fds;
     cmd cmd;
-    Bot bot;
     pollfd server_poll;
     server_poll.fd = irc.getsocket_fd();
     server_poll.events = POLLIN;
@@ -92,7 +91,7 @@ void run_server_loop(IrcServer& irc)
                             while(client->ExtractLine(line))
                             {
                                 cmd = ft_parse(line);
-                                HandleCommand(*client, cmd, irc, bot);
+                                HandleCommand(*client, cmd, irc, irc.getBot(), irc.getFileTransfer());
                                 // std::cout << cmd.c << std::endl ;
                                 // std::cout << cmd.prefix << std::endl ;
                             //
