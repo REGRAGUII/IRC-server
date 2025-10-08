@@ -95,10 +95,10 @@ cmd ft_parse(const std::string& msg)
 void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot bot){
     if(command.c== "NICK")
         handleNick(irc, client, command.args);
-    else if (command.c == "PASS")
-        handlePass(irc, client, command.args);
-    else if (command.c == "USERNAME")
-        handleUser(irc, client, command.args);
+    // else if (command.c == "PASS")
+    //     handlePass(irc, client, command.args);
+    // else if (command.c == "USERNAME")
+    //     handleUser(irc, client, command.args);
         //add the bot command here
     else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
