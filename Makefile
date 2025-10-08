@@ -1,9 +1,12 @@
 CXX = c++
-# CFLAGS = -Wall -W12extra -Werror -std=c++98
+
+CFLAGS = #-Wall -Wextra -Werror  -std=c++98
 
 SRC = $(wildcard *.cpp)
 OBJ = $(SRC:.cpp=.o)
+
 NAME = ircserv
+
 
 all: $(NAME)
 

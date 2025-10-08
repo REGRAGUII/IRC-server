@@ -1,5 +1,20 @@
 #include "init.hpp"
 
+//PASS <password>
+void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
+    if (client.isAuthenticated()) {
+        server.sendToClient(client, ":ircserv 462 " + client.getNick() +
+            " :You may not reregister\r\n");
+        return;
+    }
+    if (args.empty()) {
+        server.sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
+        return;
+    }
+    if (args[0] == server.getPassword()) {
+        client.setPassOk(true);
+    } else {
+        server.sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
 
 // //PASS <password>
 void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
@@ -29,7 +44,7 @@ void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::str
     }
     std::string nick = args[0];
     if (server.isNickTaken(nick)) {
-        client.sendMessage(":ircserv 433 * " + client.getNick() + " :Nickname is already in use\r\n");
+        server.sendToClient(client, ":ircserv 433 * " + nick + " :Nickname is already in use\r\n");
         return;
     }
     client.setNick(nick);
@@ -104,8 +119,9 @@ void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &b
         handleUser(irc, client, command.args);
     else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
-    else if(command.c[0] == '/')
-    {
+    else if(fileTransfer::isFileTransferCmd(command.c))
+        fileTransfer.handelfileTransferCmd(irc, client, command);
+    else
+        std::cout << "Unkown commande :" << command.c;
 
-    }
 }
