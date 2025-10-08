@@ -2,6 +2,7 @@
 #define init_hpp
 
 #include <iostream>
+#include <fstream>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -122,6 +123,16 @@ class IrcServer {
         return it == clients.end() ? 0 : &it->second;
         }
 
+        IrcClient *findClientByNick(const std::string nickName)
+        {
+            std::map<int, IrcClient>::iterator it;
+            for(it = clients.begin(); it != clients.end(); ++it)
+            {
+                if(it->second.getNick() == nickName)
+                    return &it->second;
+            }
+            return 0;
+        }
         void remove_client(int client_fd) {
             std::map<int, IrcClient>::iterator it = clients.find(client_fd);
             if (it != clients.end()) clients.erase(it);
@@ -143,75 +154,6 @@ class IrcServer {
         }
     };
 
-class Bot
-{
-    private :
-        std::string Name;
-        std::string Nick;
-        IrcServer *serverRef;
-    public :
-        void handelBotCommnads(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
-        {
-            std::string response;
-
-            if(args.empty())
-            {
-                response = "BOT : Please specify a commnade, try BOT help\n";
-                send(client.getClient(), response.c_str(), response.size(), 0);
-                return;
-            }
-            std::string botCommand = args[0];
-            if(botCommand == "help")
-            {
-
-            }
-            else if(botCommand == "time")
-            {
-                response = "BOT current time : " + getCurrentTime();
-                send(client.getClient(), response.c_str(), response.size(), 0);
-            }
-            else if(botCommand == "hello")
-            {
-
-            }
-            else if(botCommand == "echo" && args.size() > 1)
-            {
-                std::string msg = "BOT : ";
-                for(size_t i = 1; i < args.size(); i++)
-                    msg += args[i] + " ";
-                msg += '\n';
-                send(client.getClient(), response.c_str(), response.size(),0);
-            }
-            else
-            {
-                response = "BOT : Unknown command, try BOT help\n";
-                send(client.getClient(), response.c_str(), response.size(), 0);
-            }
-
-        }
-        std::string getCurrentTime()
-        {
-            time_t now = time(0);
-            char *timeStr = ctime(&now);
-            std::string rslt(timeStr);
-            if(!rslt.empty() && rslt[rslt.length()-1] == '\n')
-                rslt.erase(rslt.length()-1);
-            return rslt;
-        }
-};
-
-class fileTransfer
-{
-    private :
-        int senderFd;
-        int receiverFd;
-        std::vector<char> fileData;
-    public :
-        void startTransfer();
-        void sendChunk();
-        bool isComplete();
-};
-
 void ft_init(IrcServer& irc, char **argv);
 void bind_and_listen_accept(IrcServer& irc);
 int accept_new_client(IrcServer& irc);
@@ -219,6 +161,8 @@ void run_server_loop(IrcServer& irc);
 
 void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot);
 cmd ft_parse(const std::string& msg);
+
+
 
 #endif
 
