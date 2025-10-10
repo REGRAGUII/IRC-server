@@ -8,7 +8,7 @@ void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::str
             " :You may not reregister\r\n");
         return;
     }
-    if (args.empty()) {
+    if (args[0].empty()) {
         server.sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
         return;
     }
@@ -17,7 +17,7 @@ void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::str
     } else {
         server.sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
     }
-      client.tryAuthenticate();
+    client.tryAuthenticate();
 }
 
 
@@ -28,6 +28,7 @@ void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::str
         return;
     }
     std::string nick = args[0];
+    // std::cout << "nick : " << nick << "\n" << "argument: " << args[0] << "\n";
     if (server.isNickTaken(nick)) {
         server.sendToClient(client, ":ircserv 433 * " + nick + " :Nickname is already in use\r\n");
         return;

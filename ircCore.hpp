@@ -95,6 +95,7 @@ public:
     void tryAuthenticate(){
         if(!_registered && (hasNick() && hasUser() && hasPass()))
         _registered = true;};
+        
 };
 
 
