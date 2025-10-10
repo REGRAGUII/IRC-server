@@ -2,7 +2,7 @@
 
 //PASS <password>
 void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
-    if (client.isAuthenticated()) {
+    if (client.isRegistered()) {
         server.sendToClient(client, ":ircserv 462 " + client.getNick() +
             " :You may not reregister\r\n");
         return;
@@ -11,30 +11,14 @@ void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::str
         server.sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
         return;
     }
-    if (args[0] == server.getPassword()) {
-        client.setPassOk(true);
-    } else {
-        server.sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
-
-// //PASS <password>
-void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
-    if (client.isRegistered()) {
-        client.sendMessage(":ircserv 462 " + client.getNick() +
-            " :You may not reregister\r\n");
-        return;
-    }
-    if (args.empty()) {
-        client.sendMessage(":ircserv 461 * PASS :Not enough parameters\r\n");
-        return;
-    }
     if (args[0] == server.getpassword()) {
         client.setPassAccepted(true);
     } else {
-        client.sendMessage(":ircserv 464 * :Password incorrect\r\n");
-
+        server.sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
     }
-    client.tryAuthenticate();
+      client.tryAuthenticate();
 }
+
 
 // NICK <nickname>
 void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {    
@@ -119,8 +103,8 @@ void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &b
         handleUser(irc, client, command.args);
     else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
-    else if(fileTransfer::isFileTransferCmd(command.c))
-        fileTransfer.handelfileTransferCmd(irc, client, command);
+    // else if(fileTransfer::isFileTransferCmd(command.c))
+        // fileTransfer.handelfileTransferCmd(irc, client, command);
     else
         std::cout << "Unkown commande :" << command.c;
 
