@@ -1,7 +1,8 @@
 #include "init.hpp"
 
 //PASS <password>
-void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
+void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) 
+{
     if (client.isRegistered()) {
         server.sendToClient(client, ":ircserv 462 " + client.getNick() +
             " :You may not reregister\r\n");
@@ -23,7 +24,7 @@ void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::str
 // NICK <nickname>
 void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {    
     if (args.empty()) {
-        client.sendMessage(":ircserv 431 * :No nickname given\r\n"); 
+        server.sendToClient(client, ":ircserv 431 * :No nickname given\r\n"); 
         return;
     }
     std::string nick = args[0];
@@ -36,14 +37,15 @@ void handleNick(IrcServer& server, IrcClient& client, const std::vector<std::str
 }
 
 // // USER <username> <mode> <unused> :<realname>
-void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) {
-    // if (client.hasUser()) {
-        // client.sendMessage(":ircserv 462 " + client.getNick() +
-            // " :You may not reregister\r\n");
-        //./ return;
-    // }
+void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::string>& args) 
+{
+    if (client.hasUser()) {
+        server.sendToClient(client, ":ircserv 462 " + client.getNick() +
+            " :You may not reregister\r\n");
+        return;
+    }
     if (args.size() < 4) {
-        client.sendMessage(":ircserv 461 " + client.getNick() +
+        server.sendToClient(client, ":ircserv 461 " + client.getNick() +
             " USER :Not enough parameters\r\n");
         return;
     }
@@ -94,7 +96,8 @@ cmd ft_parse(const std::string& msg)
     return cmd;
 }
 
-void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot){
+void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT)
+{
     if(command.c== "NICK")
         handleNick(irc, client, command.args);
     else if (command.c == "PASS")
@@ -103,8 +106,8 @@ void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &b
         handleUser(irc, client, command.args);
     else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
-    // else if(fileTransfer::isFileTransferCmd(command.c))
-        // fileTransfer.handelfileTransferCmd(irc, client, command);
+    else if(fT.isFileTransferCmd(command.c))
+        fT.handelfileTransferCmd(irc, client,command);
     else
         std::cout << "Unkown commande :" << command.c;
 

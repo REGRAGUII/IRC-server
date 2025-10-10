@@ -1,4 +1,5 @@
 #include "fileTransfer.hpp"
+#include "ircCore.hpp"
 #include <fstream>
 #include <sstream>
 
@@ -57,7 +58,7 @@ std::string fileTransfer::buildFileStartHeader(const std::string &fileName, size
     return oss.str();
 }
 
-void fileTransfer::handelfileTransferCmd(IrcServer &irc ,IrcClient &client, cmd &command)
+void fileTransfer::handelfileTransferCmd(IrcServer &irc ,IrcClient &client,const cmd &command)
 {
     if(command.c == "/send")
     {
@@ -154,6 +155,8 @@ void fileTransfer::handelSend(IrcServer &irc, IrcClient &client, const std::vect
 
 void fileTransfer::handelAccept(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
 {
+    (void)irc;
+    (void)args;
     int clientFd = client.getClient();
     for(size_t i = 0 ; i < pendingTransfers.size(); i++)
     {
@@ -174,6 +177,8 @@ void fileTransfer::handelAccept(IrcServer &irc, IrcClient &client, const std::ve
 
 void fileTransfer::handelDecline(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
 {
+    (void)irc;
+    (void)args;
     int  clientFd = client.getClient();
     for(size_t i = 0; i < pendingTransfers.size(); i++)
     {

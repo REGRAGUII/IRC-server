@@ -10,7 +10,7 @@ void bind_and_listen_accept(IrcServer& irc);
 int accept_new_client(IrcServer& irc);
 void run_server_loop(IrcServer& irc);
 
-void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot);
+void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &bot, fileTransfer &fT);
 
 cmd ft_parse(const std::string& msg);
 
