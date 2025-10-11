@@ -3,6 +3,7 @@
 
 IrcServer::IrcServer() {
     fT = new fileTransfer();
+    testMode = false;
 }
 
 IrcServer::~IrcServer() {

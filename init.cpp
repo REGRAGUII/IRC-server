@@ -28,6 +28,21 @@ void bind_and_listen_accept(IrcServer& irc)
 
 
 
+// int accept_new_client(IrcServer& irc)
+// {
+//     sockaddr_in client_addr;
+//     socklen_t client_len = sizeof(client_addr);
+//     int client_fd = accept(irc.getsocket_fd(),(struct sockaddr *)&client_addr,&client_len);
+//     if (client_fd < 0)
+//         throw std::runtime_error("accept failed");
+
+//     std::cout << "New client connected: " << client_fd - 3 << "\n";
+//     irc.add_client(client_fd);
+//     return client_fd;
+// }
+
+///////////////////////////////////////////////////////
+// test method
 int accept_new_client(IrcServer& irc)
 {
     sockaddr_in client_addr;
@@ -38,8 +53,19 @@ int accept_new_client(IrcServer& irc)
 
     std::cout << "New client connected: " << client_fd - 3 << "\n";
     irc.add_client(client_fd);
+
+    if (irc.isTestMode()) {
+        // check if both test clients exist
+        IrcClient* clientA = irc.findClientByNick("TestUser4");
+        IrcClient* clientB = irc.findClientByNick("TestUser5");
+        if (clientA && clientB) {
+            irc.getFileTransfer().testSendFile(irc, "test.jpg");
+        }
+    }
+
     return client_fd;
 }
+/////////////////////////////////////////////////////////////
 
 void run_server_loop(IrcServer& irc)
 {

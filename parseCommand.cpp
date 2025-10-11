@@ -60,6 +60,7 @@ void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::str
 
 
 
+
 cmd ft_parse(const std::string& msg)
 {
     cmd cmd;
@@ -97,15 +98,14 @@ cmd ft_parse(const std::string& msg)
     return cmd;
 }
 
-void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT)
-{
-    if(command.c== "NICK")
-        handleNick(irc, client, command.args);
-    else if (command.c == "PASS")
-        handlePass(irc, client, command.args);
-    else if (command.c == "USERNAME")
-        handleUser(irc, client, command.args);
-    else if(command.c == "BOT")
+void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT){
+    // if(command.c== "NICK")
+    //     handleNick(irc, client, command.args);
+    // else if (command.c == "PASS")
+    //     handlePass(irc, client, command.args);
+    // else if (command.c == "USERNAME")
+    //     handleUser(irc, client, command.args);
+    if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
     else if(fT.isFileTransferCmd(command.c))
         fT.handelfileTransferCmd(irc, client,command);
