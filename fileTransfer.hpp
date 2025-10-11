@@ -39,6 +39,7 @@ class fileTransfer
         std::string buildFileStartHeader(const std::string &fileName, size_t size);
 
         //// command handlers
+        void testSendFile(IrcServer &irc, const std::string &filename);
         void handelfileTransferCmd(IrcServer &irc ,IrcClient &client,const cmd &command);
         void startTransfer(FileTransferSession &session);
         void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
