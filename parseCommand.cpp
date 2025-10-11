@@ -12,6 +12,7 @@ void handlePass(IrcServer& server, IrcClient& client, const std::vector<std::str
         server.sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
         return;
     }
+    std::cout << "argument :" << args[0] << "\n" << "server :" << server.getpassword() << "\n";
     if (args[0] == server.getpassword()) {
         client.setPassAccepted(true);
     } else {
@@ -73,7 +74,7 @@ cmd ft_parse(const std::string& msg)
     std::istringstream ss(command);
     std::string tk;
 
-    if(!command.empty() && command[0] == '\/'){
+    if(!command.empty() && command[0] == '/'){
         ss >> tk;
         cmd.prefix = tk.substr(1);
     }
@@ -99,17 +100,18 @@ cmd ft_parse(const std::string& msg)
 }
 
 void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT){
-    // if(command.c== "NICK")
-    //     handleNick(irc, client, command.args);
-    // else if (command.c == "PASS")
-    //     handlePass(irc, client, command.args);
-    // else if (command.c == "USERNAME")
-    //     handleUser(irc, client, command.args);
+    if(command.c== "NICK")
+        handleNick(irc, client, command.args);
+    else if (command.c == "PASS")
+        handlePass(irc, client, command.args);
+    else if (command.c == "USERNAME")
+        handleUser(irc, client, command.args);
     if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
     else if(fT.isFileTransferCmd(command.c))
         fT.handelfileTransferCmd(irc, client,command);
     else
-        std::cout << "Unkown commande :" << command.c;
+        irc.sendToClient(client, "Unknow Command : " + command.c +"\n");
+        
 
 }

@@ -104,8 +104,11 @@ public:
 
     bool isRegistered() const { return _registered; }
     void tryAuthenticate(){
-        if(!_registered && (hasNick() && hasUser() && hasPass()))
-        _registered = true;};
+        if(!_registered && (hasNick() && hasUser() && hasPass())){
+            sendMessage("Welcome to IRC Server ");
+            // std::cout << "Welcome to IRC Server " << getUsername() << "\n";
+            _registered = true;};
+        }
         
 };
 
@@ -141,17 +144,17 @@ class IrcServer {
             std::cout << "Client (fd = " << client_fd << ") ";
             std::cout << "Client number " << clients.size() - 1 << " is connected\n";
 
-            if (testMode)  // ✅ If test mode is enabled
-            {
-                IrcClient &client = clients[client_fd];
-                client.setNick("TestUser" + std::to_string(client_fd));
-                client.setUsername("user" + std::to_string(client_fd));
-                client.setRealname("RealName");
-                client.setPassAccepted(true);
-                client.setRegistered(true);
-                std::cout << "✅ Test mode: client auto-registered (" 
-                  << client.getNick() << ")\n";
-    }
+    //         if (testMode)  // ✅ If test mode is enabled
+    //         {
+    //             IrcClient &client = clients[client_fd];
+    //             client.setNick("TestUser" + std::to_string(client_fd));
+    //             client.setUsername("user" + std::to_string(client_fd));
+    //             client.setRealname("RealName");
+    //             client.setPassAccepted(true);
+    //             client.setRegistered(true);
+    //             std::cout << "✅ Test mode: client auto-registered (" 
+    //               << client.getNick() << ")\n";
+    // }
         }
 
          IrcClient* getClient(int id) {
