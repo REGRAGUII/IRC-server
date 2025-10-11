@@ -1,9 +1,9 @@
 #include "bot.hpp"
 #include <ctime>
 #include <sys/socket.h>
-#include <unistd.h> // for send()
+#include <unistd.h>
 
-#include "ircCore.hpp" // for IrcServer and IrcClient
+#include "ircCore.hpp"
 
 Bot::Bot() : botName("BOT") {}
 

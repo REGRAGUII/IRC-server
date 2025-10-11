@@ -196,3 +196,84 @@ void fileTransfer::handelDecline(IrcServer &irc, IrcClient &client, const std::v
     std::string response = "Error : no pending file transfer\n";
     send(clientFd, response.c_str(), response.size(), 0);
 }
+
+
+///////////////////////////////////////////////////////////////////////
+// test method
+#include "ircCore.hpp"
+#include <fstream>
+#include <thread>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <iostream>
+
+void fileTransfer::testSendFile(IrcServer &irc, const std::string &filename)
+{
+    const std::string sendPath = "/home/ytabia/Desktop/";
+    const std::string recvPath = "/home/ytabia/";
+
+    IrcClient* sender = irc.findClientByNick("TestUser4");
+    IrcClient* receiver = irc.findClientByNick("TestUser5");
+
+    if (!sender || !receiver) {
+        std::cout << "Test clients not found\n";
+        return;
+    }
+
+    int port = 9000;
+
+    // receiver thread
+    std::thread recvThread([filename, recvPath, port]() {
+        int listenSock = socket(AF_INET, SOCK_STREAM, 0);
+        sockaddr_in addr{};
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = INADDR_ANY;
+
+        bind(listenSock, (sockaddr*)&addr, sizeof(addr));
+        listen(listenSock, 1);
+
+        int clientSock = accept(listenSock, nullptr, nullptr);
+
+        std::ofstream out(recvPath + "received_" + filename, std::ios::binary);
+        char buffer[4096];
+        int bytes;
+        while ((bytes = recv(clientSock, buffer, sizeof(buffer), 0)) > 0)
+            out.write(buffer, bytes);
+
+        close(clientSock);
+        close(listenSock);
+        std::cout << "✅ File saved to " << recvPath << "received_" << filename << "\n";
+    });
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    // sender
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    sockaddr_in addr{};
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
+
+    connect(sock, (sockaddr*)&addr, sizeof(addr));
+
+    std::ifstream file(sendPath + filename, std::ios::binary);
+    if (!file) {
+        std::cerr << "❌ Could not open file: " << sendPath + filename << "\n";
+        return;
+    }
+
+    char buf[4096];
+    while (file.read(buf, sizeof(buf)))
+        send(sock, buf, file.gcount(), 0);
+    send(sock, buf, file.gcount(), 0);
+
+    close(sock);
+    std::cout << "✅ File sent by " << sender->getNick() << " from " << sendPath << "\n";
+
+    recvThread.join();
+}
+
+////////////////////////////////////////////////////////////////////////////////////

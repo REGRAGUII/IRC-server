@@ -69,14 +69,25 @@ public:
     void sendMessage(const std::string& msg){
         send(client_fd, msg.c_str(), msg.size(), 0);
     }
+    // bool ExtractLine(std::string& line) {
+    //     std::string::size_type pos = _buffer.find("\r\n");
+    //     if (pos == std::string::npos)
+    //         return false;
+    //     line = _buffer.substr(0, pos + 2);
+    //     _buffer.erase(0, pos + 2);
+    //     return true;
+    // }
     bool ExtractLine(std::string& line) {
-        std::string::size_type pos = _buffer.find("\r\n");
+    std::string::size_type pos = _buffer.find("\r\n");
+    if (pos == std::string::npos) {
+        pos = _buffer.find("\n");  // fallback for netcat/manual testing
         if (pos == std::string::npos)
             return false;
-        line = _buffer.substr(0, pos + 2);
-        _buffer.erase(0, pos + 2);
-        return true;
     }
+    line = _buffer.substr(0, pos);
+    _buffer.erase(0, (pos + (_buffer[pos] == '\r' ? 2 : 1)));
+    return true;
+}
 
     void setNick(const std::string& n) { _nick = n; }
     void setUsername(const std::string& u) { _username = u; }
@@ -99,9 +110,12 @@ class IrcServer {
         std::map <int, IrcClient> clients;
         Bot bot;
         fileTransfer *fT;
+        bool testMode;
     public:
             // ******      Connection Data      ******
         IrcServer();
+        void enableTestMode() { testMode = true; }
+        bool isTestMode() const { return testMode; }
         Bot& getBot() {return bot;}
         fileTransfer& getFileTransfer() {return *fT;}
         std::string getpassword()const{return con_d.getpassword();}
@@ -120,6 +134,17 @@ class IrcServer {
             std::cout << "Client (fd = " << client_fd << ") ";
             std::cout << "Client number " << clients.size() - 1 << " is connected\n";
 
+            if (testMode)  // ✅ If test mode is enabled
+            {
+                IrcClient &client = clients[client_fd];
+                client.setNick("TestUser" + std::to_string(client_fd));
+                client.setUsername("user" + std::to_string(client_fd));
+                client.setRealname("RealName");
+                client.setPassAccepted(true);
+                client.setRegistered(true);
+                std::cout << "✅ Test mode: client auto-registered (" 
+                  << client.getNick() << ")\n";
+    }
         }
 
          IrcClient* getClient(int id) {
