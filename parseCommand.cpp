@@ -72,7 +72,7 @@ cmd ft_parse(const std::string& msg)
     std::istringstream ss(command);
     std::string tk;
 
-    if(!command.empty() && command[0] == ':'){
+    if(!command.empty() && command[0] == '\/'){
         ss >> tk;
         cmd.prefix = tk.substr(1);
     }
