@@ -151,7 +151,7 @@ class IrcServer {
                 client.setRegistered(true);
                 std::cout << "✅ Test mode: client auto-registered (" 
                   << client.getNick() << ")\n";
-    }
+            }
         }
 
          IrcClient* getClient(int id) {

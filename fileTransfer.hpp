@@ -4,10 +4,9 @@
 #include <string>
 #include <vector>
 #include <sys/socket.h>
-// #include "ircCore.hpp"
 
-class IrcServer;  // ✅ forward declare
-class IrcClient;  // ✅ forward declare
+class IrcServer;
+class IrcClient;
 struct cmd;
 
 class fileTransfer

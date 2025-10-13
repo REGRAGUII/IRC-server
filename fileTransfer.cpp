@@ -211,8 +211,8 @@ void fileTransfer::handelDecline(IrcServer &irc, IrcClient &client, const std::v
 
 void fileTransfer::testSendFile(IrcServer &irc, const std::string &filename)
 {
-    const std::string sendPath = "/home/ytabia/Desktop/";
-    const std::string recvPath = "/home/ytabia/";
+    const std::string sendPath = "/home/abnemili/Desktop/";
+    const std::string recvPath = "/home/ytabia/Desktop/";
 
     IrcClient* sender = irc.findClientByNick("TestUser4");
     IrcClient* receiver = irc.findClientByNick("TestUser5");
