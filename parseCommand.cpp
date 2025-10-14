@@ -113,5 +113,4 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
     else
         irc.sendToClient(client, "Unknow Command : " + command.c +"\n");
         
-
 }
