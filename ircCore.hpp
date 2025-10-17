@@ -172,6 +172,7 @@ class IrcServer {
             }
             return 0;
         }
+        
         void remove_client(int client_fd) {
             std::map<int, IrcClient>::iterator it = clients.find(client_fd);
             if (it != clients.end()) clients.erase(it);
