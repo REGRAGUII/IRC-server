@@ -4,6 +4,7 @@
 #include "ircCore.hpp"
 #include "bot.hpp"
 #include "fileTransfer.hpp"
+#include "channel.hpp"
 
 void ft_init(IrcServer& irc, char **argv);
 void bind_and_listen_accept(IrcServer& irc);

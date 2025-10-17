@@ -15,6 +15,7 @@
 #include <sstream>
 #include <map>
 #include "bot.hpp"
+#include "channel.hpp"
 
 
 class fileTransfer;
@@ -118,6 +119,7 @@ class IrcServer {
         ConnectionData  con_d;
         SocketData      sock_d;
         std::map <int, IrcClient> clients;
+        std::map<std::string, Channel> _channels;
         Bot bot;
         fileTransfer *fT;
         bool testMode;
@@ -193,7 +195,13 @@ class IrcServer {
             ssize_t n = ::send(fd, raw.data(), raw.size(), 0);
             if (n < 0) {throw std::runtime_error("send() failed");}
         }
-        ~IrcServer() ;
+
+        //channel
+        Channel* findChannel(const std::string& cname);
+        Channel& getOrCreateChannel(const std::string& cname);
+        std::map<std::string, Channel>& channels() { return _channels; }
+        
+            ~IrcServer() ;
         // {
         // for (size_t i = 0; i < clients.size(); ++i)
             // delete clients[i];

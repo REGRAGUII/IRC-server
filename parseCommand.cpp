@@ -59,9 +59,16 @@ void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::str
 }
 
 
+<<<<<<< HEAD
 // handle privmsg 
 
 
+=======
+void handleJoin(IrcServer& server, IrcClient& client, const std::vector<std::string>& args){
+    // if(client.isRegistered())
+        // server.sendToClient();
+}
+>>>>>>> 9359180e782da0ef5f495c915c3ea2b5e1f6be4a
 
 
 cmd ft_parse(const std::string& msg)
@@ -108,8 +115,13 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
         handlePass(irc, client, command.args);
     else if (command.c == "USERNAME")
         handleUser(irc, client, command.args);
+<<<<<<< HEAD
     else if (command.c == "privmsg")
         handlePrivmsg(irc, client, command.args);
+=======
+    else if (command.c == "JOIN")
+        handleJoin(irc, client, command.args);
+>>>>>>> 9359180e782da0ef5f495c915c3ea2b5e1f6be4a
     else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
     else if(fT.isFileTransferCmd(command.c))
