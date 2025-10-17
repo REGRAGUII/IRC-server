@@ -59,7 +59,10 @@ void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::str
 }
 
 
-
+void handleJoin(IrcServer& server, IrcClient& client, const std::vector<std::string>& args){
+    // if(client.isRegistered())
+        // server.sendToClient();
+}
 
 
 cmd ft_parse(const std::string& msg)
@@ -106,7 +109,9 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
         handlePass(irc, client, command.args);
     else if (command.c == "USERNAME")
         handleUser(irc, client, command.args);
-    if(command.c == "BOT")
+    else if (command.c == "JOIN")
+        handleJoin(irc, client, command.args);
+    else if(command.c == "BOT")
         bot.handelBotCommnads(irc, client, command.args);
     else if(fT.isFileTransferCmd(command.c))
         fT.handelfileTransferCmd(irc, client,command);
