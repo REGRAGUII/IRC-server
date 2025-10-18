@@ -4,24 +4,28 @@
 
 void handlePrivmsg(IrcServer& server, IrcClient& client, const std::vector<std::string>& args)
 {
-    if (args.size() != 2)
+    if(args.size() < 2)
     {
-        std::cout << "Error: privmsg must have 2 arguments" << std::endl;
+        std::string err = "Usage: PRIVMSG <recipient> <message>\n";
+        send(client.getClient(), err.c_str(), err.size(), 0);
         return;
     }
 
-    const std::string& targetNick = args[0];
-    const std::string& message = args[1];
-    
-    IrcClient* target = server.findClientByNick(targetNick);
-    std::cout << "targer = " << target << "\n" << std::endl;
-    if (!target)
+    std::string targetNick = args[0];
+    std::string message = args[1];
+
+    IrcClient *targetClient = server.findClientByNick(targetNick);
+    if(!targetClient)
     {
-        client.sendMessage("No such nick\n");
+        std::string err = "Error: User not found\n";
+        send(client.getClient(), err.c_str(), err.size(), 0);
         return;
     }
 
-    std::string msg =  " " + client.getNick() + " PRIVMSG " + targetNick + " :" + message + "\r\n";
-    target->sendMessage(msg);
+    // forward the message (for DCC or normal chat)
+    std::ostringstream oss;
+    oss << ":" << client.getNick() << " PRIVMSG " << targetNick << " :" << message << "\r\n";
+    send(targetClient->getClient(), oss.str().c_str(), oss.str().size(), 0);
 }
+
 
