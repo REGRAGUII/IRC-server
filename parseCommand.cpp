@@ -59,10 +59,6 @@ void handleUser(IrcServer& server, IrcClient& client, const std::vector<std::str
 }
 
 
-void handleJoin(IrcServer& server, IrcClient& client, const std::vector<std::string>& args){
-    // if(client.isRegistered())
-        // server.sendToClient();
-}
 
 
 cmd ft_parse(const std::string& msg)

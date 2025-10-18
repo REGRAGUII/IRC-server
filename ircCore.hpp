@@ -209,5 +209,8 @@ class IrcServer {
 
 };
 
+//commands
+void handleJoin(IrcServer& server, IrcClient& client, const std::vector<std::string>& args);
+
 
 #endif
