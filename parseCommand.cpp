@@ -102,10 +102,12 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
         handleNick(irc, client, command.args);
     else if (command.c == "PASS")
         handlePass(irc, client, command.args);
-    else if (command.c == "USERNAME")
+    else if (command.c == "USER")
         handleUser(irc, client, command.args);
     else if (command.c == "PRIVMSG")
         handlePrivmsg(irc, client, command.args);
+    else if (command.c == "PING")
+        irc.sendToClient(client, "PONG ");
     else if (command.c == "JOIN")
         handleJoin(irc, client, command.args);
     else if(command.c == "BOT")
