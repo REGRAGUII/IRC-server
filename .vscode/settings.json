@@ -58,6 +58,10 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "init.hpp": "c",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "set": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     }
 }

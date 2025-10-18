@@ -1,6 +1,7 @@
 #ifndef IRC_CORE_HPP
 #define IRC_CORE_HPP
 
+
 #include <iostream>
 #include <fstream>
 #include <sys/socket.h>
@@ -16,7 +17,6 @@
 #include <map>
 #include "bot.hpp"
 #include "channel.hpp"
-
 
 class fileTransfer;
 struct cmd{
@@ -119,7 +119,7 @@ class IrcServer {
         ConnectionData  con_d;
         SocketData      sock_d;
         std::map <int, IrcClient> clients;
-        // std::map<std::string, Channel> _channels;
+        std::map<std::string, Channel> _channels;
         Bot bot;
         fileTransfer *fT;
     public:
@@ -194,9 +194,9 @@ class IrcServer {
         }
 
         //channel
-        // Channel* findChannel(const std::string& cname);
-        // Channel& getOrCreateChannel(const std::string& cname);
-        // std::map<std::string, Channel>& channels() { return _channels; }
+        Channel* findChannel(const std::string& cname);
+        Channel& getOrCreateChannel(const std::string& cname);
+        std::map<std::string, Channel>& channels() { return _channels; };
         
             ~IrcServer() ;
         // {

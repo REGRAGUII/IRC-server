@@ -1,10 +1,10 @@
-#ifndef init_hpp
-#define init_hpp
+#ifndef INIT_HPP
+#define INIT_HPP
 
 #include "ircCore.hpp"
 #include "bot.hpp"
 #include "fileTransfer.hpp"
-#include "channel.hpp"
+
 
 void ft_init(IrcServer& irc, char **argv);
 void bind_and_listen_accept(IrcServer& irc);
