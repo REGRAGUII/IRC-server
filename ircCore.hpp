@@ -119,15 +119,12 @@ class IrcServer {
         ConnectionData  con_d;
         SocketData      sock_d;
         std::map <int, IrcClient> clients;
-        std::map<std::string, Channel> _channels;
+        // std::map<std::string, Channel> _channels;
         Bot bot;
         fileTransfer *fT;
-        bool testMode;
     public:
             // ******      Connection Data      ******
         IrcServer();
-        void enableTestMode() { testMode = true; }
-        bool isTestMode() const { return testMode; }
         Bot& getBot() {return bot;}
         fileTransfer& getFileTransfer() {return *fT;}
         std::string getpassword()const{return con_d.getpassword();}
@@ -197,9 +194,9 @@ class IrcServer {
         }
 
         //channel
-        Channel* findChannel(const std::string& cname);
-        Channel& getOrCreateChannel(const std::string& cname);
-        std::map<std::string, Channel>& channels() { return _channels; }
+        // Channel* findChannel(const std::string& cname);
+        // Channel& getOrCreateChannel(const std::string& cname);
+        // std::map<std::string, Channel>& channels() { return _channels; }
         
             ~IrcServer() ;
         // {
