@@ -45,8 +45,15 @@ void fileTransfer::handelSend(IrcServer &irc, IrcClient &client, const std::vect
 
     // build proper DCC message
     std::ostringstream oss;
-    oss << "PRIVMSG " << recipientNick << " : SEND " << fileName
-        << " " << ipInt << " " << port << " 0\x01\r\n";
+    oss << "PRIVMSG " 
+        << recipientNick 
+        << " :"
+        << oss.put('\x01')
+        << "DCC SEND " 
+        << fileName
+        << " " << ipInt 
+        << " " << port 
+        << " 0\x01\r\n";
 
     send(recipient->getClient(), oss.str().c_str(), oss.str().size(), 0);
 
