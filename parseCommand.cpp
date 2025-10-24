@@ -111,7 +111,7 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
     else if (command.c == "JOIN")
         handleJoin(irc, client, command.args);
     else if(command.c == "BOT")
-        bot.handelBotCommnads(irc, client, command.args);
+        bot.handelBot(irc, client, command.args);
     else if(command.c == "/send")
         fT.handelSend(irc, client,command.args);
     else

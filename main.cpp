@@ -7,9 +7,6 @@ int main(int argc, char **argv)
         if (argc != 3)
             throw std::runtime_error("Invalid number of arguments!");
         IrcServer irc;
-        // irc.enableTestMode();
-        // irc.setport(6667);
-        // irc.setpassword("pwd");
         irc.setpassword(argv[2]);
         ft_init(irc, argv);
         bind_and_listen_accept(irc);
