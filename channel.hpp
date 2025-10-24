@@ -3,16 +3,18 @@
 
 #include <map>
 #include <set>
+#include <vector>
 #include <string>
 #include <iostream>
+class IrcClient;
 
 class Channel{
     private:
         std::string _ChannelName;
         std::string _topic;
-        std::set<int> _members;
-        std::set<int> _operators;
-        std::set<int> _invites; 
+        std::vector<IrcClient*> _members;
+        std::vector<int> _operators;
+        std::vector<int> _invites; 
 
     public:
 
@@ -20,12 +22,18 @@ class Channel{
         Channel(std::string name){_ChannelName = name;};
         const std::string GetChannelName() const {return this->_ChannelName;};
         const std::string GetChannelTame() const {return this->_topic;}
+        void addMember(IrcClient* client);
+        std::string getNamesList() const;
+        const std::vector<IrcClient*>& getMembers() const
+        {
+            return _members;
+        };
         void SetChannelTopic(const std::string NewTopic){ _topic = NewTopic;};
         ~Channel(){};
 
-        void addMember(int fd) {_members.insert(fd);};
-        void addOperators(int fd) {_operators.insert(fd);};
-        void addInvites(int fd) {_invites.insert(fd);};
+        // void addMember(int fd) {_members.push_back(fd);};
+        void addOperators(int fd) {_operators.push_back(fd);};
+        void addInvites(int fd) {_invites.push_back(fd);};
 
 };
 

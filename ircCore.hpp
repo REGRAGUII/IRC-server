@@ -61,10 +61,12 @@ private:
     std::string _realname;
     bool _passAccepted;
     bool _registered;
+    std::string _host;
 
 public:
-    IrcClient() : client_fd(-1), _passAccepted(false), _registered(false) {}
+    IrcClient() : client_fd(-1), _passAccepted(false), _registered(false), _host("localhost"){}
     IrcClient(int fd) :client_fd(fd), _passAccepted(false), _registered(false){}
+    const std::string& getHost() const {return _host;}
     int getClient() const { return client_fd; }
     void Buffering(const std::string& add){ _buffer += add;}
     void sendMessage(const std::string& msg){
@@ -106,7 +108,7 @@ public:
     bool isRegistered() const { return _registered; }
     void tryAuthenticate(){
         if(!_registered && (hasNick() && hasUser() && hasPass())){
-            sendMessage("Welcome to IRC Server ");
+            // sendMessage("Welcome to IRC Server ");
             // std::cout << "Welcome to IRC Server " << getUsername() << "\n";
             _registered = true;};
         }
@@ -126,6 +128,8 @@ class IrcServer {
             // ******      Connection Data      ******
         IrcServer();
         Bot& getBot() {return bot;}
+        void broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude);
+        void handleJoin(IrcClient& client, const std::string& channelName);
         fileTransfer& getFileTransfer() {return *fT;}
         std::string getpassword()const{return con_d.getpassword();}
         int getport()const {return con_d.getport();}
@@ -187,16 +191,11 @@ class IrcServer {
         std::map<std::string, Channel>& channels() { return _channels; };
         
         ~IrcServer() ;
-        // {
-        // for (size_t i = 0; i < clients.size(); ++i)
-            // delete clients[i];
-        // clients.clear();
-        // }
 
 };
 
 //commands
-void handleJoin(IrcServer& server, IrcClient& client, const std::vector<std::string>& args);
+// void handleJoin(IrcServer& server, IrcClient& client, const std::vector<std::string>& args);
 
 
 #endif

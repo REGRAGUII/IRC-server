@@ -109,12 +109,11 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
     else if (command.c == "PING")
         irc.sendToClient(client, "PONG ");
     else if (command.c == "JOIN")
-        handleJoin(irc, client, command.args);
+        irc.handleJoin( client, command.args[0]);
     else if(command.c == "BOT")
         bot.handelBot(irc, client, command.args);
     else if(command.c == "/send")
         fT.handelSend(irc, client,command.args);
     else
         irc.sendToClient(client, "Unknow Command : " + command.c +"\n");
-        
 }

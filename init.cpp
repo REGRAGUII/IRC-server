@@ -82,23 +82,14 @@ void run_server_loop(IrcServer& irc)
                     }
                     else
                     {
-
-                            IrcClient* client = irc.getClient(fds[i].fd);
-                            client->Buffering(std::string(buffer));
-                            std::string line;
-                            while(client->ExtractLine(line))
-                            {
-                                cmd = ft_parse(line);
-                                HandleCommand(*client, cmd, irc, irc.getBot(), irc.getFileTransfer());
-                                // std::cout << cmd.c << std::endl ;
-                                // std::cout << cmd.prefix << std::endl ;
-                            //
-                            //  for (size_t i = 0; i < cmd.args.size(); i++)
-                            // {
-                                    // std::cout << cmd.args[i] << std::endl;
-                            // }
-                            }
-
+                        IrcClient* client = irc.getClient(fds[i].fd);
+                        client->Buffering(std::string(buffer));
+                        std::string line;
+                        while(client->ExtractLine(line))
+                        {
+                            cmd = ft_parse(line);
+                            HandleCommand(*client, cmd, irc, irc.getBot(), irc.getFileTransfer());
+                        }
 
                 }
             }
