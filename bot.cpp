@@ -228,7 +228,7 @@ bool containWholeWord(const std::string &text , const std::string &word)
     return false;
 }
 
-void Bot::handelBotCommnads(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
+void Bot::handelBot(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args)
 {
     (void)irc;
     std::string response;

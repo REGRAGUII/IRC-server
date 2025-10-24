@@ -142,18 +142,6 @@ class IrcServer {
             clients[client_fd] = IrcClient(client_fd);
             std::cout << "Client (fd = " << client_fd << ") ";
             std::cout << "Client number " << clients.size() - 1 << " is connected\n";
-
-    //         if (testMode)  // ✅ If test mode is enabled
-    //         {
-    //             IrcClient &client = clients[client_fd];
-    //             client.setNick("TestUser" + std::to_string(client_fd));
-    //             client.setUsername("user" + std::to_string(client_fd));
-    //             client.setRealname("RealName");
-    //             client.setPassAccepted(true);
-    //             client.setRegistered(true);
-    //             std::cout << "✅ Test mode: client auto-registered (" 
-    //               << client.getNick() << ")\n";
-    // }
         }
 
          IrcClient* getClient(int id) {
@@ -198,7 +186,7 @@ class IrcServer {
         Channel& getOrCreateChannel(const std::string& cname);
         std::map<std::string, Channel>& channels() { return _channels; };
         
-            ~IrcServer() ;
+        ~IrcServer() ;
         // {
         // for (size_t i = 0; i < clients.size(); ++i)
             // delete clients[i];

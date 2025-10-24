@@ -23,7 +23,7 @@ private:
 public:
 
     Bot();
-    void handelBotCommnads(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
+    void handelBot(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
     std::string getCurrentTime();
 };
 
