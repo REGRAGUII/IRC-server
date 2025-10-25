@@ -181,6 +181,93 @@ class IrcServer {
         Channel* findChannel(const std::string& cname);
         Channel& getOrCreateChannel(const std::string& cname);
         std::map<std::string, Channel>& channels() { return _channels; };
+        
+        // commandes handler
+        void handlePass(IrcClient& client, const std::vector<std::string>& args) 
+        {
+            if (client.isRegistered()) 
+            {
+                sendToClient(client, ":ircserv 462 " + client.getNick() +
+                    " :You may not reregister\r\n");
+                return;
+            }
+            if (args[0].empty()) 
+            {
+                sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
+                return;
+            }
+            std::cout << "argument :" << args[0] << "\n" << "server :" << getpassword() << "\n";
+            if (args[0] == getpassword()) 
+                client.setPassAccepted(true);
+            else 
+                sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
+            client.tryAuthenticate();
+        }
+
+        void handleNick(IrcClient& client, const std::vector<std::string>& args) 
+        {    
+            if (args.empty()) 
+            {
+                sendToClient(client, ":ircserv 431 * :No nickname given\r\n"); 
+                return;
+            }
+            std::string nick = args[0];
+            // std::cout << "nick : " << nick << "\n" << "argument: " << args[0] << "\n";
+            if (isNickTaken(nick))
+            {
+                sendToClient(client, ":ircserv 433 * " + nick + " :Nickname is already in use\r\n");
+                return;
+            }
+            client.setNick(nick);
+            client.tryAuthenticate();
+        }
+        
+        void handleUser(IrcClient& client, const std::vector<std::string>& args) 
+        {
+        if (client.hasUser()) 
+        {
+            sendToClient(client, ":ircserv 462 " + client.getNick() +
+            " :You may not reregister\r\n");
+            return;
+        }
+        if (args.size() < 4) 
+        {
+            sendToClient(client, ":ircserv 461 " + client.getNick() +
+            " USER :Not enough parameters\r\n");
+            return;
+        }
+        std::string username = args[0];
+        std::string realname = args[3];
+        client.setUsername(username);
+        client.setRealname(realname);
+        client.tryAuthenticate();
+        }
+        
+        void handlePrivmsg(IrcClient& client, const std::vector<std::string>& args)
+        {
+            if(args.size() < 2)
+            {
+                std::string err = "Usage: PRIVMSG <recipient> <message>\n";
+                send(client.getClient(), err.c_str(), err.size(), 0);
+                return;
+            }
+        
+            std::string targetNick = args[0];
+            std::string message = args[1];
+        
+            IrcClient *targetClient = findClientByNick(targetNick);
+            if(!targetClient)
+            {
+                std::string err = "Error: User not found\n";
+                send(client.getClient(), err.c_str(), err.size(), 0);
+                return;
+            }
+            // forward the message (for DCC or normal chat)
+            std::ostringstream oss;
+            oss << ":" << client.getNick() << " PRIVMSG " << targetNick << " :" << message << "\r\n";
+            send(targetClient->getClient(), oss.str().c_str(), oss.str().size(), 0);
+        }
+
         //modes
         void handelKick(IrcClient& client, const std::vector<std::string>& args)
         {
@@ -202,9 +289,5 @@ class IrcServer {
         ~IrcServer() ;
 
 };
-
-//commands
-// void handleJoin(IrcServer& server, IrcClient& client, const std::vector<std::string>& args);
-
 
 #endif
