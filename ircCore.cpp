@@ -6,9 +6,6 @@ IrcServer::IrcServer() {
     fT = new fileTransfer();
 }
 
-
-
-
 Channel* IrcServer::findChannel(const std::string& cname) {
     std::map<std::string, Channel>::iterator it = _channels.find(cname);
     return (it == _channels.end()) ? 0 : &it->second;
@@ -42,8 +39,8 @@ std::string Channel::getNamesList() const {
 }
 
 void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude) {
-    for (size_t i = 0; i < channel.getMembers().size(); ++i) {
-        IrcClient* member = channel.getMembers()[i];
+    for (size_t i = 0; i < channel.GetMembers().size(); ++i) {
+        IrcClient* member = channel.GetMembers()[i];
         if (member != exclude)
             member->sendMessage(msg);
     }
