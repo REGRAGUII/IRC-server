@@ -72,14 +72,6 @@ public:
     void sendMessage(const std::string& msg){
         send(client_fd, msg.c_str(), msg.size(), 0);
     }
-    // bool ExtractLine(std::string& line) {
-    //     std::string::size_type pos = _buffer.find("\r\n");
-    //     if (pos == std::string::npos)
-    //         return false;
-    //     line = _buffer.substr(0, pos + 2);
-    //     _buffer.erase(0, pos + 2);
-    //     return true;
-    // }
     bool ExtractLine(std::string& line) {
     std::string::size_type pos = _buffer.find("\r\n");
     if (pos == std::string::npos) {
@@ -112,7 +104,7 @@ public:
             // std::cout << "Welcome to IRC Server " << getUsername() << "\n";
             _registered = true;};
         }
-        
+
 };
 
 
@@ -163,7 +155,7 @@ class IrcServer {
             }
             return 0;
         }
-        
+
         void remove_client(int client_fd) {
             std::map<int, IrcClient>::iterator it = clients.find(client_fd);
             if (it != clients.end()) clients.erase(it);
@@ -189,7 +181,24 @@ class IrcServer {
         Channel* findChannel(const std::string& cname);
         Channel& getOrCreateChannel(const std::string& cname);
         std::map<std::string, Channel>& channels() { return _channels; };
-        
+        //modes
+        void handelKick(IrcClient& client, const std::vector<std::string>& args)
+        {
+
+        }
+         void handelInvite(IrcClient& client, const std::vector<std::string>& args)
+        {
+
+        }
+         void handelTopic(IrcClient& client, const std::vector<std::string>& args)
+        {
+
+        }
+         void handelMode(IrcClient& client, const std::vector<std::string>& args)
+        {
+
+        }
+
         ~IrcServer() ;
 
 };
