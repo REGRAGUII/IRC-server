@@ -14,7 +14,7 @@ Channel* IrcServer::findChannel(const std::string& cname) {
     return (it == _channels.end()) ? 0 : &it->second;
 }
 
-// 
+//
 // Channel& IrcServer::getOrCreateChannel(const std::string& cname) {
     // std::map<std::string, Channel>::iterator it = _channels.find(cname);
     // if (it != _channels.end()) return it->second;
@@ -30,11 +30,6 @@ Channel& IrcServer::getOrCreateChannel(const std::string& cname) {
 
     _channels.insert(std::make_pair(cname, Channel(cname)));
     return _channels.find(cname)->second;
-}
-
-void Channel::addMember(IrcClient* client) {
-    // if (!isMember(client))
-        _members.push_back(client);
 }
 
 std::string Channel::getNamesList() const {
