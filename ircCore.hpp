@@ -262,7 +262,6 @@ class IrcServer {
                 send(client.getClient(), err.c_str(), err.size(), 0);
                 return;
             }
-            // forward the message (for DCC or normal chat)
             std::ostringstream oss;
             oss << ":" << client.getNick() << " PRIVMSG " << targetNick << " :" << message << "\r\n";
             send(targetClient->getClient(), oss.str().c_str(), oss.str().size(), 0);
@@ -277,14 +276,14 @@ class IrcServer {
         {
 
         }
-         void handelTopic(IrcClient& client, const std::vector<std::string>& args)
-        {
+        //  void handelTopic(IrcClient& client, const std::vector<std::string>& args)
+        // {
 
-        }
-         void handelMode(IrcClient& client, const std::vector<std::string>& args)
-        {
+        // }
+        //  void handelMode(IrcClient& client, const std::vector<std::string>& args)
+        // {
 
-        }
+        // }
 
         ~IrcServer() ;
 
