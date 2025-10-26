@@ -16,8 +16,6 @@ void HandleCommand(IrcClient& client, const cmd& command, IrcServer& irc, Bot &b
 
 cmd ft_parse(const std::string& msg);
 
-
-
 #endif
 
 

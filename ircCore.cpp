@@ -29,15 +29,6 @@ Channel& IrcServer::getOrCreateChannel(const std::string& cname) {
     return _channels.find(cname)->second;
 }
 
-std::string Channel::getNamesList() const {
-    std::string list;
-    for (size_t i = 0; i < _members.size(); ++i) {
-        if (i > 0) list += " ";
-        list += _members[i]->getNick();
-    }
-    return list;
-}
-
 void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude) {
     for (size_t i = 0; i < channel.GetMembers().size(); ++i) {
         IrcClient* member = channel.GetMembers()[i];
