@@ -108,7 +108,7 @@ public:
 };
 
 
-class IrcServer {
+class IrcServer { 
     private:
         ConnectionData  con_d;
         SocketData      sock_d;
@@ -268,14 +268,14 @@ class IrcServer {
         }
 
         //modes
-        void handelKick(IrcClient& client, const std::vector<std::string>& args)
-        {
+        // void handelKick(IrcClient& client, const std::vector<std::string>& args)
+        // {
 
-        }
-         void handelInvite(IrcClient& client, const std::vector<std::string>& args)
-        {
+        // }
+        //  void handelInvite(IrcClient& client, const std::vector<std::string>& args)
+        // {
 
-        }
+        // }
         //  void handelTopic(IrcClient& client, const std::vector<std::string>& args)
         // {
 
