@@ -180,6 +180,7 @@ class IrcServer {
         //channel
         Channel* findChannel(const std::string& cname);
         Channel& getOrCreateChannel(const std::string& cname);
+        Channel* GetChannel(const std::string& cname);
         std::map<std::string, Channel>& channels() { return _channels; };
         
         // commandes handler
@@ -276,14 +277,146 @@ class IrcServer {
         // {
 
         // }
-        //  void handelTopic(IrcClient& client, const std::vector<std::string>& args)
-        // {
+         void handelTopic(IrcClient& client, const std::vector<std::string>& args)
+        {
+            if(args.empty())
+            {
+                client.sendMessage(" 461 " + client.getNick() + " TOPIC : not enogh parameter\r\n");
+                return;
+            }
 
-        // }
-        //  void handelMode(IrcClient& client, const std::vector<std::string>& args)
-        // {
+            const std::string channelName = args[0];
+            // check if channel exist
+            Channel *channel = GetChannel(channelName);
+            if(!channel)
+            {
+                client.sendMessage(" 403 " + client.getNick()  + " " + channelName + " : no such channel\r\n");
+                return;
+            }
+            // check if client is in the channel
+            if(!channel->isMember(&client))
+            {
+                client.sendMessage(" 442 " + client.getNick()  + " " + channelName + " : you are not in this channel\r\n");
+                return;
+            }
+            // if there is no topic show cuurent topic
+            if(args.size() ==  1)
+                if(channel->GetChannelTopic().empty())
+                    client.sendMessage(" 331 " + client.getNick()  + " " + channelName + " : not topic is set\r\n");
+                else
+                    client.sendMessage(" 331 " + client.getNick()  + " " + channelName + " :" + channel->GetChannelTopic() + "\r\n");
+                return;
+            // setting new topic
+            std::string newTopic = args[1];
+            // check if topic restrected to operators
+            if(channel->isTopicRestrected(&client) && !channel->isOperator(&client))
+            {
+                client.sendMessage(" 482 " + client.getNick()  + " " + channelName + " : you are not channel operator\r\n");
+                return;
+            }
+            // set the topic
+            channel->SetChannelTopic(newTopic);
+            // broadcast topic change to channel
+            std::string host = client.getHost().empty() ? "localhost" : client.getHost();
+            std::string topicMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + "TOPIC " + channelName + " :" + newTopic + "\r\n";
+            broadcastToChannel(*channel, topicMsg, NULL);
 
-        // }
+        }
+         void handelMode(IrcClient& client, const std::vector<std::string>& args)
+        {
+            // mode #channel +/-mode [param]
+            if(args.size() < 2)
+            {
+                client.sendMessage(" 461 " + client.getNick() + " MODE : not enogh parameter\r\n");
+                return;
+            }
+            std::string channelName = args[0];
+            std::string modeString = args[1];
+            // check if channel exist
+            Channel *channel = GetChannel(channelName);
+            if(!channel)
+            {
+                client.sendMessage(" 403 " + client.getNick()  + " " + channelName + " : no such channel\r\n");
+                return;
+            }
+            // check if client in the channel
+            if(!channel->isMember(&client))
+            {
+                client.sendMessage(" 442 " + client.getNick()  + " " + channelName + " : you are not in this channel\r\n");
+                return;
+            }
+            // check if cleint is operator
+            if(!channel->isOperator(&client))
+            {
+                client.sendMessage(" 482 " + client.getNick()  + " " + channelName + " : you are not channel operator\r\n");
+                return;
+            }
+            // pars mode
+
+            bool adding = true;
+            std::string appliedModes;
+            std::string modeParam;
+            size_t argIndex = 2;
+            for(int i = 0; i < modeString.length(); i++)
+            {
+                char mode = modeString[i];
+                if(mode == '+')
+                    adding = true;
+                else if(mode == '-')
+                    adding = false;
+                else if(mode == 'i') // invite only mode
+                {
+                    channel->setInviteOnly(adding);
+                    appliedModes += adding ? "+i" : "-i";
+                }
+                else if(mode == 't') // topic restrected mode
+                {
+                    channel->setTopicRestrected(adding);
+                    appliedModes += adding ? "+t" : "-t";
+                }
+                else if(mode == 'k') // channel key passwd mode
+                {
+                    if(adding)
+                    {
+                        if(argIndex <  args.size())
+                        {
+                            channel->setKey(args[argIndex]);
+                            appliedModes += "+k";
+                            modeParam += " " + argIndex;
+                            argIndex++;
+                        }
+                        else
+                        {
+                            client.sendMessage("461 " + client.getNick() + " MODE +k :not enough parameters\r\n");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        channel->setKey("");
+                        appliedModes += "-k";
+                    }
+                }
+                else if(mode == 'o') // op privilage mode
+                {
+                    if(argIndex < args.size())
+                    {
+                        std::string targetNick = args[argIndex];
+                        IrcClient *target = findClientByNick(targetNick);
+                        if(!target)
+                        {
+                            client.sendMessage("401" + client.getNick() + " " + targetNick + " :no such nick\r\n");
+                            argIndex++;
+                            continue;
+                        }
+                        
+                    }
+                }
+                else if(mode == 'l')
+                {///////}
+
+            }
+        }
 
         ~IrcServer() ;
 
