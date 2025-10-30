@@ -48,6 +48,7 @@ class Channel{
 
         bool isOperator(IrcClient* client) const ;
         bool isMember(IrcClient* client) const ;
+        bool isTopicRestrected(IrcClient* client) const;
         // op manag
         void addOperator(IrcClient* client);
         void removeOperator(IrcClient* client);

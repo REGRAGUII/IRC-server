@@ -28,7 +28,12 @@ Channel& IrcServer::getOrCreateChannel(const std::string& cname) {
     _channels.insert(std::make_pair(cname, Channel(cname)));
     return _channels.find(cname)->second;
 }
-
+Channel* IrcServer::GetChannel(const std::string& cname) 
+{
+    std::map<std::string, Channel>::iterator it = _channels.find(cname);
+    if (it != _channels.end())
+        return it->second;
+}
 // std::string Channel::getNamesList() const {
     // std::string list;
     // for (size_t i = 0; i < _members.size(); ++i) {
