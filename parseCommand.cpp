@@ -46,10 +46,10 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
         irc.handleUser(client, command.args);
     else if (command.c == "PRIVMSG")
         irc.handlePrivmsg(client, command.args);
-    // else if(command.c == "KICK")
-    //     irc.handelKick(client, command.args);
-    // else if(command.c == "INVITE")
-    //     irc.handelInvite(client, command.args);
+    else if(command.c == "KICK")
+        irc.handelKick(client, command.args);
+    else if(command.c == "INVITE")
+        irc.handelInvite(client, command.args);
     else if(command.c == "TOPIC")
         irc.handelTopic(client, command.args);
     else if(command.c == "MODE")

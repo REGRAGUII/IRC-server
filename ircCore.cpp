@@ -14,7 +14,7 @@ void IrcClient::sendMessage(const std::string& msg)
 bool IrcClient::ExtractLine(std::string& line)
 {
     std::string::size_type pos = _buffer.find("\r\n");
-    if (pos == std::string::npos) 
+    if (pos == std::string::npos)
     {
         pos = _buffer.find("\n");
         if (pos == std::string::npos)
@@ -49,10 +49,7 @@ void IrcClient::tryAuthenticate()
 
 
 
-IrcServer::IrcServer() 
-{
-    fT = new fileTransfer();
-}
+IrcServer::IrcServer() { fT = new fileTransfer();}
 Bot& IrcServer::getBot() { {return bot;}}
 fileTransfer& IrcServer::getFileTransfer() {return *fT;}
 std::string IrcServer::getpassword()const {return con_d.getpassword();}
@@ -65,7 +62,7 @@ void IrcServer::setpassword(std::string pwd) {con_d.setpassword(pwd);}
 void IrcServer::setport(int poort) {con_d.setport(poort);}
 void IrcServer::setsocket(int socket) {sock_d.setsocket_fd(socket);}
 
-void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude) 
+void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude)
 {
     for (size_t i = 0; i < channel.GetMembers().size(); ++i) {
         IrcClient* member = channel.GetMembers()[i];
@@ -122,7 +119,7 @@ Channel* IrcServer::findChannel(const std::string& cname)
     std::map<std::string, Channel>::iterator it = _channels.find(cname);
     return (it == _channels.end()) ? 0 : &it->second;
 }
-Channel& IrcServer::getOrCreateChannel(const std::string& cname) 
+Channel& IrcServer::getOrCreateChannel(const std::string& cname)
 {
     std::map<std::string, Channel>::iterator it = _channels.find(cname);
     if (it != _channels.end())
@@ -271,10 +268,10 @@ void IrcServer::handleJoin(IrcClient& client, const std::vector<std::string>& ar
         client.sendMessage("461 " + client.getNick() + " JOIN :Not enough parameters\r\n");
         return;
     }
-    
+
     std::string channelName = args[0];
     std::string password = (args.size() > 1) ? args[1] : "";
-    
+
     // get or create channel
     Channel& channel = getOrCreateChannel(channelName);
     // check if already in channel
@@ -319,12 +316,109 @@ void IrcServer::handleJoin(IrcClient& client, const std::vector<std::string>& ar
     client.sendMessage("366 " + client.getNick() + " " + channelName + " :End of /NAMES list.\r\n");
 }
 
+void IrcServer::handelInvite(IrcClient& client, const std::vector<std::string>& args)
+{
+    // INVITE nickname #channel
+    if(args.size() < 2)
+    {
+        client.sendMessage("461 " + client.getNick() + " INVITE :not enough parameters\r\n");
+        return;
+    }
+    std::string targetNick = args[0];
+    const std::string channelName = args[1];
+
+    Channel* channel = GetChannel(channelName);
+    if(!channel)
+    {
+        client.sendMessage("403 " + client.getNick() + " " + channelName + " :no such channel\r\n");
+        return;
+    }
+    if(!channel->isMember(&client))
+    {
+        client.sendMessage("442 " + client.getNick() + " " + channelName + " :you are not on that channel\r\n");
+        return;
+    }
+    // check if client is operator (required for invite-only channels)
+    if(channel->isInviteOnly() && !channel->isOperator(&client))
+    {
+        client.sendMessage("482 " + client.getNick() + " " + channelName + " :you are not channel operator\r\n");
+        return;
+    }
+    IrcClient *target = findClientByNick(targetNick);
+    if(!target)
+    {
+        client.sendMessage("401 " + client.getNick() + " " + targetNick + " :no such nick\r\n");
+        return;
+    }
+    if(channel->isMember(target))
+    {
+        client.sendMessage("443 " + client.getNick() + " " + targetNick + " " + channelName + " :is already on channel\r\n");
+        return;
+    }
+    // add target to invite list
+    channel->addInvite(target);
+    // send invite
+    std::string host = client.getHost().empty() ? "localhost" : client.getHost();
+    std::string inviteMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " INVITE " + targetNick + " :" + channelName + "\r\n";
+    target->sendMessage(inviteMsg);
+    // confirm
+    client.sendMessage("341 " + client.getNick() + " " + targetNick + " " + channelName + "\r\n");
+
+}
+
+void IrcServer::handelKick(IrcClient& client, const std::vector<std::string>& args)
+{
+    // KICK #channel nickname [reason]
+    if(args.size() < 2)
+    {
+        client.sendMessage("461 " + client.getNick() + " KICK :not enough parameters\r\n");
+        return;
+    }
+    std::string targetNick = args[0];
+    const std::string channelName = args[1];// KICK nickname #channel
+    std::string reason = (args.size() > 2) ? args[2] : client.getNick();
+
+    Channel* channel = GetChannel(channelName);
+    if(!channel)
+    {
+        client.sendMessage("403 " + client.getNick() + " " + channelName + " :no such channel\r\n");
+        return;
+    }
+    if(!channel->isMember(&client))
+    {
+        client.sendMessage("442 " + client.getNick() + " " + channelName + " :you are not on that channel\r\n");
+        return;
+    }
+    if(!channel->isOperator(&client))
+    {
+        client.sendMessage("482 " + client.getNick() + " " + channelName + " :you are not channel operator\r\n");
+        return;
+    }
+    // find target
+    IrcClient* target = findClientByNick(targetNick);
+    if(!target)
+    {
+        client.sendMessage("401 " + client.getNick() + " " + targetNick + " :no such nick\r\n");
+        return;
+    }
+    if (!channel->isMember(target))
+    {
+        client.sendMessage("441 " + client.getNick() + " " + targetNick + " " + channelName + " :they are not on that channel\r\n");
+        return;
+    }
+    // kick msg
+    std::string host = client.getHost().empty() ? "localhost" : client.getHost();
+    std::string kickMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " KICK " + channelName + " " + targetNick + " :" + reason + "\r\n";
+    broadcastToChannel(*channel, kickMsg, NULL);
+    channel->removeMember(target);
+
+}
 void IrcServer::handleModes(IrcClient& client, const std::vector<std::string>& args)
 {
     // MODE #channel +/-mode [param]
     if (args.size() < 2)
     {
-        client.sendMessage("461 " + client.getNick() + " MODE :not enough parameters\r\n");
+        client.sendMessage("461 " + client.getNick() + " MODE :Not enough parameters\r\n");
         return;
     }
     std::string channelName = args[0];
@@ -501,10 +595,8 @@ bool IrcServer::handleMode_l(Channel* channel, IrcClient& client, bool adding, s
         return true;
     }
 }
-IrcServer::~IrcServer() 
-{
-    delete fT;
-}
+IrcServer::~IrcServer() { delete fT; }
+
 
 
 // void IrcServer::handleJoin(IrcClient& client, const std::string& channelName) {
