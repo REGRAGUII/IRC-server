@@ -46,8 +46,6 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
         irc.handleUser(client, command.args);
     else if (command.c == "PRIVMSG")
         irc.handlePrivmsg(client, command.args);
-    // else if (command.c == "PING")
-    //     irc.sendToClient(client, "PONG ");
     // else if(command.c == "KICK")
     //     irc.handelKick(client, command.args);
     // else if(command.c == "INVITE")

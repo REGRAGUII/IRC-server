@@ -133,7 +133,7 @@ Bot::Bot() : botName("BOT")
     p15.keywords.push_back("smart");
     p15.response.push_back("Thank you! I try my best.");
     p15.response.push_back("Aww, that’s kind of you to say!");
-    p15.response.push_back("I’m just doing my job 😄");
+    p15.response.push_back("I’m just doing my job");
     patterns.push_back(p15);
     
     pattern p16;

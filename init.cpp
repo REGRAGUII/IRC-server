@@ -90,7 +90,6 @@ void run_server_loop(IrcServer& irc)
                             cmd = ft_parse(line);
                             HandleCommand(*client, cmd, irc, irc.getBot(), irc.getFileTransfer());
                         }
-
                 }
             }
         }

@@ -10,9 +10,9 @@ class IrcClient;
 struct cmd;
 class fileTransfer
 {
-    public :
-        fileTransfer();
-        void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
+public :
+    fileTransfer();
+    void handelSend(IrcServer &irc, IrcClient &client, const std::vector<std::string> &args);
 };
 
 #endif
