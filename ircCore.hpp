@@ -36,7 +36,7 @@ public:
     void setsocket_fd(int socket){socket_fd = socket;}
 
 };
-class ConnectionData 
+class ConnectionData
 {
 private :
     int prt;
@@ -84,7 +84,7 @@ public:
 
 };
 
-class IrcServer 
+class IrcServer
 {
 private:
     ConnectionData  con_d;
@@ -100,7 +100,7 @@ public:
     fileTransfer& getFileTransfer();
     std::string getpassword()const;
     int getport()const;
-    
+
     void setpassword(std::string pwd);
     void setport(int poort);
     void broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude);
@@ -122,15 +122,15 @@ public:
     Channel* GetChannel(const std::string& cname);
     std::map<std::string, Channel>& channels();
     // commandes handler
-    void handleJoin(IrcClient& client, const std::vector<std::string>& args);
+    void handleUser(IrcClient& client, const std::vector<std::string>& args);
     void handlePass(IrcClient& client, const std::vector<std::string>& args);
     void handleNick(IrcClient& client, const std::vector<std::string>& args);
-    void handleUser(IrcClient& client, const std::vector<std::string>& args);
     void handlePrivmsg(IrcClient& client, const std::vector<std::string>& args);
-    // modes
-    // void handelKick(IrcClient& client, const std::vector<std::string>& args);
-    //  void handelInvite(IrcClient& client, const std::vector<std::string>& args);
+    void handleJoin(IrcClient& client, const std::vector<std::string>& args);
+    void handelKick(IrcClient& client, const std::vector<std::string>& args);
+    void handelInvite(IrcClient& client, const std::vector<std::string>& args);
     void handelTopic(IrcClient& client, const std::vector<std::string>& args);
+    // modes
     void handleModes(IrcClient& client, const std::vector<std::string>& args);
     void handleMode_i(Channel* channel, bool adding, std::string& appliedModes);
     void handleMode_t(Channel* channel, bool adding, std::string& appliedModes);
