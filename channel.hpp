@@ -8,7 +8,7 @@
 #include <iostream>
 #include<algorithm>
 // #include "ircCore.hpp"
-class IrcClient; 
+class IrcClient;
 
 class Channel{
     private:
@@ -48,6 +48,7 @@ class Channel{
 
         bool isOperator(IrcClient* client) const ;
         bool isMember(IrcClient* client) const ;
+        bool isInviteOnly() const;
         bool isTopicRestrected(IrcClient* client) const;
         // op manag
         void addOperator(IrcClient* client);

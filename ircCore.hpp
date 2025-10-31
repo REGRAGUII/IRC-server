@@ -108,7 +108,7 @@ public:
 };
 
 
-class IrcServer { 
+class IrcServer {
     private:
         ConnectionData  con_d;
         SocketData      sock_d;
@@ -121,7 +121,7 @@ class IrcServer {
         IrcServer();
         Bot& getBot() {return bot;}
         void broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude);
-        void handleJoin(IrcClient& client, const std::string& channelName);
+        void handleJoin(IrcClient& client, const std::vector<std::string>& args);
         fileTransfer& getFileTransfer() {return *fT;}
         std::string getpassword()const{return con_d.getpassword();}
         int getport()const {return con_d.getport();}
@@ -182,34 +182,34 @@ class IrcServer {
         Channel& getOrCreateChannel(const std::string& cname);
         Channel* GetChannel(const std::string& cname);
         std::map<std::string, Channel>& channels() { return _channels; };
-        
+
         // commandes handler
-        void handlePass(IrcClient& client, const std::vector<std::string>& args) 
+        void handlePass(IrcClient& client, const std::vector<std::string>& args)
         {
-            if (client.isRegistered()) 
+            if (client.isRegistered())
             {
                 sendToClient(client, ":ircserv 462 " + client.getNick() +
                     " :You may not reregister\r\n");
                 return;
             }
-            if (args[0].empty()) 
+            if (args[0].empty())
             {
                 sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
                 return;
             }
             std::cout << "argument :" << args[0] << "\n" << "server :" << getpassword() << "\n";
-            if (args[0] == getpassword()) 
+            if (args[0] == getpassword())
                 client.setPassAccepted(true);
-            else 
+            else
                 sendToClient(client, ":ircserv 464 * :Password incorrect\r\n");
             client.tryAuthenticate();
         }
 
-        void handleNick(IrcClient& client, const std::vector<std::string>& args) 
-        {    
-            if (args.empty()) 
+        void handleNick(IrcClient& client, const std::vector<std::string>& args)
+        {
+            if (args.empty())
             {
-                sendToClient(client, ":ircserv 431 * :No nickname given\r\n"); 
+                sendToClient(client, ":ircserv 431 * :No nickname given\r\n");
                 return;
             }
             std::string nick = args[0];
@@ -222,16 +222,16 @@ class IrcServer {
             client.setNick(nick);
             client.tryAuthenticate();
         }
-        
-        void handleUser(IrcClient& client, const std::vector<std::string>& args) 
+
+        void handleUser(IrcClient& client, const std::vector<std::string>& args)
         {
-        if (client.hasUser()) 
+        if (client.hasUser())
         {
             sendToClient(client, ":ircserv 462 " + client.getNick() +
             " :You may not reregister\r\n");
             return;
         }
-        if (args.size() < 4) 
+        if (args.size() < 4)
         {
             sendToClient(client, ":ircserv 461 " + client.getNick() +
             " USER :Not enough parameters\r\n");
@@ -243,7 +243,7 @@ class IrcServer {
         client.setRealname(realname);
         client.tryAuthenticate();
         }
-        
+
         void handlePrivmsg(IrcClient& client, const std::vector<std::string>& args)
         {
             if(args.size() < 2)
@@ -252,10 +252,10 @@ class IrcServer {
                 send(client.getClient(), err.c_str(), err.size(), 0);
                 return;
             }
-        
+
             std::string targetNick = args[0];
             std::string message = args[1];
-        
+
             IrcClient *targetClient = findClientByNick(targetNick);
             if(!targetClient)
             {
@@ -301,11 +301,13 @@ class IrcServer {
             }
             // if there is no topic show cuurent topic
             if(args.size() ==  1)
+            {
                 if(channel->GetChannelTopic().empty())
                     client.sendMessage(" 331 " + client.getNick()  + " " + channelName + " : not topic is set\r\n");
                 else
                     client.sendMessage(" 331 " + client.getNick()  + " " + channelName + " :" + channel->GetChannelTopic() + "\r\n");
                 return;
+            }
             // setting new topic
             std::string newTopic = args[1];
             // check if topic restrected to operators
@@ -320,101 +322,195 @@ class IrcServer {
             std::string host = client.getHost().empty() ? "localhost" : client.getHost();
             std::string topicMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + "TOPIC " + channelName + " :" + newTopic + "\r\n";
             broadcastToChannel(*channel, topicMsg, NULL);
-
         }
-         void handelMode(IrcClient& client, const std::vector<std::string>& args)
+
+        void handleMode_i(Channel* channel, bool adding, std::string& appliedModes)
         {
-            // mode #channel +/-mode [param]
-            if(args.size() < 2)
+            channel->setInviteOnly(adding);
+            appliedModes += adding ? "+i" : "-i";
+        }
+        void handleMode_t(Channel* channel, bool adding, std::string& appliedModes)
+        {
+            channel->setTopicRestrected(adding);
+            appliedModes += adding ? "+t" : "-t";
+        }
+        bool handleMode_k(Channel* channel, IrcClient& client, bool adding, std::string& appliedModes, std::string& modeParams, const std::vector<std::string>& args, size_t& argIndex)
+        {
+            if (adding)
             {
-                client.sendMessage(" 461 " + client.getNick() + " MODE : not enogh parameter\r\n");
+                if (argIndex < args.size())
+                {
+                    channel->setKey(args[argIndex]);
+                    appliedModes += "+k";
+                    modeParams += " " + args[argIndex];
+                    argIndex++;
+                    return true;
+                }
+                else
+                {
+                    client.sendMessage("461 " + client.getNick() + " MODE +k :not enough parameters\r\n");
+                    return false;
+                }
+            }
+            else
+            {
+                channel->setKey("");
+                appliedModes += "-k";
+                return true;
+            }
+        }
+
+        bool handleMode_o(Channel* channel, IrcClient& client, bool adding, std::string& appliedModes, std::string& modeParams, const std::vector<std::string>& args, size_t& argIndex)
+        {
+            if (argIndex < args.size())
+            {
+                std::string targetNick = args[argIndex];
+                IrcClient* target = findClientByNick(targetNick);
+
+                if (!target)
+                {
+                    client.sendMessage("401 " + client.getNick() + " " + targetNick + " :no such nick\r\n");
+                    argIndex++;
+                    return false;
+                }
+
+                if (!channel->isMember(target))
+                {
+                    client.sendMessage("441 " + client.getNick() + " " + targetNick + " " + channel->GetChannelName() + " :they aren't on that channel\r\n");
+                    argIndex++;
+                    return false;
+                }
+
+                if (adding)
+                {
+                    channel->addOperator(target);
+                    appliedModes += "+o";
+                }
+                else
+                {
+                    channel->removeOperator(target);
+                    appliedModes += "-o";
+                }
+
+                modeParams += " " + targetNick;
+                argIndex++;
+                return true;
+            }
+            else
+            {
+                client.sendMessage("461 " + client.getNick() + " MODE +o :not enough parameters\r\n");
+                return false;
+            }
+        }
+        bool handleMode_l(Channel* channel, IrcClient& client, bool adding, std::string& appliedModes, std::string& modeParams, const std::vector<std::string>& args, size_t& argIndex)
+        {
+            if (adding)
+            {
+                if (argIndex < args.size())
+                {
+                    int limit = atoi(args[argIndex].c_str());
+                    if (limit > 0)
+                    {
+                        channel->setUserLimit(limit);
+                        appliedModes += "+l";
+                        modeParams += " " + args[argIndex];
+                        argIndex++;
+                        return true;
+                    }
+                    else
+                    {
+                        client.sendMessage("461 " + client.getNick() + " MODE +l :Invalid limit\r\n");
+                        argIndex++;
+                        return false;
+                    }
+                }
+                else
+                {
+                    client.sendMessage("461 " + client.getNick() + " MODE +l :Not enough parameters\r\n");
+                    return false;
+                }
+            }
+            else
+            {
+                channel->setUserLimit(0);
+                appliedModes += "-l";
+                return true;
+            }
+        }
+
+        void handleModes(IrcClient& client, const std::vector<std::string>& args)
+        {
+            // MODE #channel +/-mode [param]
+            if (args.size() < 2)
+            {
+                client.sendMessage("461 " + client.getNick() + " MODE :not enough parameters\r\n");
                 return;
             }
             std::string channelName = args[0];
             std::string modeString = args[1];
-            // check if channel exist
-            Channel *channel = GetChannel(channelName);
-            if(!channel)
+            // check if channel exists
+            Channel* channel = GetChannel(channelName);
+            if (!channel)
             {
-                client.sendMessage(" 403 " + client.getNick()  + " " + channelName + " : no such channel\r\n");
+                client.sendMessage("403 " + client.getNick() + " " + channelName + " :no such channel\r\n");
                 return;
             }
-            // check if client in the channel
-            if(!channel->isMember(&client))
+             // check if client in the channel
+            if (!channel->isMember(&client))
             {
-                client.sendMessage(" 442 " + client.getNick()  + " " + channelName + " : you are not in this channel\r\n");
+                client.sendMessage("442 " + client.getNick() + " " + channelName + " :you are not on that channel\r\n");
                 return;
             }
-            // check if cleint is operator
-            if(!channel->isOperator(&client))
+            // check if client is operator
+            if (!channel->isOperator(&client))
             {
-                client.sendMessage(" 482 " + client.getNick()  + " " + channelName + " : you are not channel operator\r\n");
+                client.sendMessage("482 " + client.getNick() + " " + channelName + " :you are not channel operator\r\n");
                 return;
             }
-            // pars mode
-
+             // parse modes
             bool adding = true;
             std::string appliedModes;
-            std::string modeParam;
+            std::string modeParams;
             size_t argIndex = 2;
-            for(int i = 0; i < modeString.length(); i++)
+
+            for(size_t i = 0; i < modeString.length(); i++)
             {
                 char mode = modeString[i];
                 if(mode == '+')
                     adding = true;
                 else if(mode == '-')
                     adding = false;
-                else if(mode == 'i') // invite only mode
+                else if(mode == 'i') // mode +i/-i invite only
+                    handleMode_i(channel, adding, appliedModes);
+                else if(mode == 't') // mode +t/-t topic restricted
+                    handleMode_t(channel, adding, appliedModes);
+                else if(mode == 'k') // mode +k/-k channel password
                 {
-                    channel->setInviteOnly(adding);
-                    appliedModes += adding ? "+i" : "-i";
+                    if (!handleMode_k(channel, client, adding, appliedModes, modeParams, args, argIndex))
+                    continue;
                 }
-                else if(mode == 't') // topic restrected mode
+                else if(mode == 'o') // mode +o/-o operator privilege
                 {
-                    channel->setTopicRestrected(adding);
-                    appliedModes += adding ? "+t" : "-t";
+                    if (!handleMode_o(channel, client, adding, appliedModes, modeParams, args, argIndex))
+                    continue;
                 }
-                else if(mode == 'k') // channel key passwd mode
+                else if(mode == 'l') // mode +l/-l User limit
                 {
-                    if(adding)
-                    {
-                        if(argIndex <  args.size())
-                        {
-                            channel->setKey(args[argIndex]);
-                            appliedModes += "+k";
-                            modeParam += " " + argIndex;
-                            argIndex++;
-                        }
-                        else
-                        {
-                            client.sendMessage("461 " + client.getNick() + " MODE +k :not enough parameters\r\n");
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        channel->setKey("");
-                        appliedModes += "-k";
-                    }
+                    if (!handleMode_l(channel, client, adding, appliedModes, modeParams, args, argIndex))
+                    continue;
                 }
-                else if(mode == 'o') // op privilage mode
+                else
                 {
-                    if(argIndex < args.size())
-                    {
-                        std::string targetNick = args[argIndex];
-                        IrcClient *target = findClientByNick(targetNick);
-                        if(!target)
-                        {
-                            client.sendMessage("401" + client.getNick() + " " + targetNick + " :no such nick\r\n");
-                            argIndex++;
-                            continue;
-                        }
-                        
-                    }
+                    std::string unknownMode(1, mode);
+                    client.sendMessage("472 " + client.getNick() + " " + unknownMode + " :is unknown mode char to me\r\n");
                 }
-                else if(mode == 'l')
-                {///////}
-
+            }
+            // broadcast mode change to channel if any modes were applied
+            if (!appliedModes.empty())
+            {
+                std::string host = client.getHost().empty() ? "localhost" : client.getHost();
+                std::string modeMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " MODE " + channelName + " " + appliedModes + modeParams + "\r\n";
+                broadcastToChannel(*channel, modeMsg, NULL);
             }
         }
 
