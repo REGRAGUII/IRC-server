@@ -48,16 +48,16 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
         irc.handlePrivmsg(client, command.args);
     // else if (command.c == "PING")
     //     irc.sendToClient(client, "PONG ");
-    else if(command.c == "KICK")
-        irc.handelKick(client, command.args);
-    else if(command.c == "INVITE")
-        irc.handelInvite(client, command.args);
-    // else if(command.c == "TOPIC")
-    //     irc.handelTopic(client, command.args);
-    // else if(command.c == "MODE")
-    //     irc.handelMode(client, command.args);
+    // else if(command.c == "KICK")
+    //     irc.handelKick(client, command.args);
+    // else if(command.c == "INVITE")
+    //     irc.handelInvite(client, command.args);
+    else if(command.c == "TOPIC")
+        irc.handelTopic(client, command.args);
+    else if(command.c == "MODE")
+        irc.handleModes(client, command.args);
     else if (command.c == "JOIN")
-        irc.handleJoin( client, command.args[0]);
+        irc.handleJoin( client, command.args);
     else if(command.c == "BOT")
         bot.handelBot(irc, client, command.args);
     else if(command.c == "/send")

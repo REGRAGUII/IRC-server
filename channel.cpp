@@ -40,6 +40,7 @@
 
         bool Channel::isOperator(IrcClient* client) const { return std::find(_operators.begin(), _operators.end(), client) !=_operators.end();}
         bool Channel::isMember(IrcClient* client) const {return std::find(_members.begin(), _members.end(), client) != _members.end();}
+        bool Channel::isInviteOnly() const { return inviteOnly; }
         bool Channel::isTopicRestrected(IrcClient* client) const {return std::find(_members.begin(), _members.end(), client) != _members.end();}
         // op manag
         void Channel::addOperator(IrcClient* client)
