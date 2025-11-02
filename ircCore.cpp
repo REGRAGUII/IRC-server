@@ -62,12 +62,29 @@ void IrcServer::setpassword(std::string pwd) {con_d.setpassword(pwd);}
 void IrcServer::setport(int poort) {con_d.setport(poort);}
 void IrcServer::setsocket(int socket) {sock_d.setsocket_fd(socket);}
 
-void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude)
+// void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude)
+// {
+//     for (size_t i = 0; i < channel.GetMembers().size(); ++i) {
+//         IrcClient* member = channel.GetMembers()[i];
+//         if (member != exclude)
+//             member->sendMessage(msg);
+//     }
+// }
+
+void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* sender)
 {
+    // Debug: print out the number of members in the channel
+    std::cout << "Broadcasting message to channel with " << channel.GetMembers().size() << " members.\n";
+
     for (size_t i = 0; i < channel.GetMembers().size(); ++i) {
         IrcClient* member = channel.GetMembers()[i];
-        if (member != exclude)
+        // Debug: print out who is receiving the message
+        std::cout << "Sending message to: " << member->getNick() << "\n";
+
+        // Don't send the message to the sender
+        if (member != sender) {
             member->sendMessage(msg);
+        }
     }
 }
 
@@ -204,7 +221,9 @@ void IrcServer::handlePrivmsg(IrcClient& client, const std::vector<std::string>&
         return;
     }
     std::string targetNick = args[0];
-    std::string message = args[1];
+    std::string message;
+    for(std::vector<std::string>::const_iterator it = args.begin(); it < args.end(); it++)
+        message += *it + " ";
     IrcClient *targetClient = findClientByNick(targetNick);
     if(!targetClient)
     {
