@@ -38,28 +38,34 @@ cmd ft_parse(const std::string& msg)
 }
 
 void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT){
+    std::cout<< command.c << std::endl;
     if(command.c== "NICK")
         irc.handleNick(client, command.args);
     else if (command.c == "PASS")
         irc.handlePass(client, command.args);
     else if (command.c == "USER")
         irc.handleUser(client, command.args);
-    else if (command.c == "PRIVMSG")
+    else if (client.isRegistered() && command.c == "PRIVMSG")
         irc.handlePrivmsg(client, command.args);
-    else if(command.c == "KICK")
+    else if(client.isRegistered() && command.c == "KICK")
         irc.handelKick(client, command.args);
-    else if(command.c == "INVITE")
+    else if(client.isRegistered() && command.c == "INVITE")
         irc.handelInvite(client, command.args);
-    else if(command.c == "TOPIC")
+    else if(client.isRegistered() &&  command.c == "TOPIC")
         irc.handelTopic(client, command.args);
-    else if(command.c == "MODE")
+    else if(client.isRegistered() && command.c == "MODE")
         irc.handleModes(client, command.args);
-    else if (command.c == "JOIN")
+    else if (client.isRegistered() && command.c == "JOIN")
         irc.handleJoin( client, command.args);
-    else if(command.c == "BOT")
+    else if(client.isRegistered() && command.c == "BOT")
         bot.handelBot(irc, client, command.args);
-    else if(command.c == "/send")
+    else if(client.isRegistered() && command.c == "/send")
         fT.handelSend(irc, client,command.args);
+    else if (!client.isRegistered())
+    {
+        irc.sendToClient(client, "You are  Not Authentificated : " + command.c +"\n");
+    }
+    
     else
         irc.sendToClient(client, "Unknow Command : " + command.c +"\n");
 }

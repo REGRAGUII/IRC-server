@@ -7,9 +7,16 @@ IrcClient::IrcClient(int fd) : client_fd(fd), _passAccepted(false), _registered(
 const std::string& IrcClient::getHost() const {return _host;}
 int IrcClient::getClient() const { return client_fd; }
 void IrcClient::Buffering(const std::string& add) { _buffer += add;}
-void IrcClient::sendMessage(const std::string& msg)
+void IrcClient::sendMessages(const std::string& msg, IrcClient*targetClient)
 {
+    //:Nick!user@host PRIVMSG #channel :hello everyone
+    // std::string resp;
+    // resp =  ":" + client->getNick() + "!" + client->getUsername() + "@1337.ma PRIVMSG #ty :" + msg + "\r\n";
+    send(targetClient->getClient(), msg.c_str(), msg.size(), 0);
+}
+void IrcClient::sendMessage(const std::string& msg){
     send(client_fd, msg.c_str(), msg.size(), 0);
+    // (void)msg;
 }
 bool IrcClient::ExtractLine(std::string& line)
 {
@@ -75,15 +82,21 @@ void IrcServer::broadcastToChannel(const Channel& channel, const std::string& ms
 {
     // Debug: print out the number of members in the channel
     std::cout << "Broadcasting message to channel with " << channel.GetMembers().size() << " members.\n";
-
-    for (size_t i = 0; i < channel.GetMembers().size(); ++i) {
-        IrcClient* member = channel.GetMembers()[i];
+    std::cout << channel.getNamesList() << std::endl;
+    // std::vector<IrcClient *>::iterator it;
+    // for (it = j.begin(); it != j.end(); ++it){
+        //     std::cout << "wahed\n";
+        // }
+    std::vector<IrcClient *> j = channel.GetMembers();
+    for (size_t i = 0; i < j.size(); i++) {
+        std::cout << j[i]->getNick()<< std::endl;
+        IrcClient* member = j[i];
         // Debug: print out who is receiving the message
         std::cout << "Sending message to: " << member->getNick() << "\n";
-
+    
         // Don't send the message to the sender
         if (member != sender) {
-            member->sendMessage(msg);
+            member->sendMessages(msg, member);
         }
     }
 }
@@ -136,13 +149,17 @@ Channel* IrcServer::findChannel(const std::string& cname)
     std::map<std::string, Channel>::iterator it = _channels.find(cname);
     return (it == _channels.end()) ? 0 : &it->second;
 }
-Channel& IrcServer::getOrCreateChannel(const std::string& cname)
+Channel& IrcServer::getOrCreateChannel(const std::string& cname, std::string pass, IrcClient &client)
 {
     std::map<std::string, Channel>::iterator it = _channels.find(cname);
     if (it != _channels.end())
+    {
         return it->second;
-
+    }
+    
     _channels.insert(std::make_pair(cname, Channel(cname)));
+    _channels.find(cname)->second.setKey(pass);
+    _channels.find(cname)->second.addOperator(&client);
     return _channels.find(cname)->second;
 }
 Channel* IrcServer::GetChannel(const std::string& cname)
@@ -212,6 +229,29 @@ void IrcServer::handleNick(IrcClient& client, const std::vector<std::string>& ar
     client.tryAuthenticate();
 }
 
+// void IrcServer::handlePrivmsg(IrcClient& client, const std::vector<std::string>& args)
+// {
+//     if (args.size() != 2)
+//     {
+//         std::cout << "Error: privmsg must have 2 arguments" << std::endl;
+//         return;
+//     }
+
+//     const std::string& targetNick = args[0];
+//     const std::string& message = args[1];
+    
+//     IrcClient* target = findClientByNick(targetNick);
+//     std::cout << "targer = " << target << "\n" << std::endl;
+//     if (!target)
+//     {
+//         client.sendMessage("No such nick\n");
+//         return;
+//     }
+
+//     std::string msg =  " " + client.getNick() + " PRIVMSG " + targetNick + " :" + message + "\r\n";
+//     target->sendMessage(msg);
+// }
+
 void IrcServer::handlePrivmsg(IrcClient& client, const std::vector<std::string>& args)
 {
     if(args.size() < 2)
@@ -222,8 +262,31 @@ void IrcServer::handlePrivmsg(IrcClient& client, const std::vector<std::string>&
     }
     std::string targetNick = args[0];
     std::string message;
-    for(std::vector<std::string>::const_iterator it = args.begin(); it < args.end(); it++)
+    for(std::vector<std::string>::const_iterator it = args.begin(); it < args.end(); ++it)
         message += *it + " ";
+    if(targetNick[0] == '#')
+    {
+        Channel *ch =  GetChannel(targetNick);
+        std::vector<IrcClient *> j = ch->GetMembers();
+        bool joined = false;
+        for (size_t i = 0; i < j.size(); i++) {
+            if (j[i]->getClient() == client.getClient())
+            {
+                joined = true;
+                break;
+            }
+            
+        }
+        if (!joined)
+            return;
+        std::cout << targetNick[0] << std::endl;
+        //:Nick!user@host PRIVMSG #channel :hello everyone
+        std::string msg = ":" + client.getNick() + "!" + client.getUsername() + "@1337.ma PRIVMSG " + targetNick + " :"+ args[1] + "\r\n";
+        std::cout << msg << std::endl;
+        
+        broadcastToChannel(*GetChannel(targetNick), msg, &client);
+        return;
+    }
     IrcClient *targetClient = findClientByNick(targetNick);
     if(!targetClient)
     {
@@ -262,14 +325,14 @@ void IrcServer::handelTopic(IrcClient& client, const std::vector<std::string>& a
     {
         if(channel->GetChannelTopic().empty())
             client.sendMessage(" 331 " + client.getNick()  + " " + channelName + " : not topic is set\r\n");
-        else
+            else
             client.sendMessage(" 331 " + client.getNick()  + " " + channelName + " :" + channel->GetChannelTopic() + "\r\n");
-        return;
+            return;
     }
     // setting new topic
     std::string newTopic = args[1];
     // check if topic restrected to operators
-    if(channel->isTopicRestrected(&client) && !channel->isOperator(&client))
+    if(channel->isTopicRestrected() && !channel->isOperator(&client))
     {
         client.sendMessage(" 482 " + client.getNick()  + " " + channelName + " : you are not channel operator\r\n");
         return;
@@ -278,7 +341,7 @@ void IrcServer::handelTopic(IrcClient& client, const std::vector<std::string>& a
     channel->SetChannelTopic(newTopic);
     // broadcast topic change to channel
     std::string host = client.getHost().empty() ? "localhost" : client.getHost();
-    std::string topicMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + "TOPIC " + channelName + " :" + newTopic + "\r\n";
+    std::string topicMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " TOPIC " + channelName + " :" + newTopic + "\r\n";
     broadcastToChannel(*channel, topicMsg, NULL);
 }
 void IrcServer::handleJoin(IrcClient& client, const std::vector<std::string>& args)
@@ -287,12 +350,18 @@ void IrcServer::handleJoin(IrcClient& client, const std::vector<std::string>& ar
         client.sendMessage("461 " + client.getNick() + " JOIN :Not enough parameters\r\n");
         return;
     }
-
+    if (args[0].empty() ||  args[0][0] != '#')
+    {
+        client.sendMessage("461 " + client.getNick() + " JOIN :Not a valid channel name \r\n");
+        return;
+    }
+    
     std::string channelName = args[0];
     std::string password = (args.size() > 1) ? args[1] : "";
-
+    
     // get or create channel
-    Channel& channel = getOrCreateChannel(channelName);
+    Channel& channel = getOrCreateChannel(channelName, password, client);
+    
     // check if already in channel
     if (channel.isMember(&client))
     return;  // Already in channel
@@ -321,18 +390,23 @@ void IrcServer::handleJoin(IrcClient& client, const std::vector<std::string>& ar
     channel.removeInvite(&client);
     // build JOIN message
     std::string host = client.getHost().empty() ? "localhost" : client.getHost();
-    std::string joinMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " JOIN :" + channelName + "\r\n";
+    // :Nick!user@host JOIN :#channel
+    std::string joinMsg = ":" + client.getNick() + "!" + client.getUsername() + "@1337.ma JOIN " + args[0] + "\r\n";
     // send JOIN to the joining client
     client.sendMessage(joinMsg);
     // broadcast JOIN to other users in channel
-    broadcastToChannel(channel, joinMsg, &client);
+    // std::string
+    // broadcastToChannel(channel, joinMsg, &client);
     // send topic if set
     if (!channel.GetChannelTopic().empty())
     client.sendMessage("332 " + client.getNick() + " " + channelName + " :" + channel.GetChannelTopic() + "\r\n");
     // Ssnd NAMES list
+    std::vector<IrcClient *> j = channel.GetMembers();
     std::string names = channel.getNamesList();
-    client.sendMessage("353 " + client.getNick() + " = " + channelName + " :" + names + "\r\n");
-    client.sendMessage("366 " + client.getNick() + " " + channelName + " :End of /NAMES list.\r\n");
+    for (size_t i = 0; i < j.size(); i++) {
+        j[i]->sendMessage(":irc.1337.ma 353 " + j[i]->getNick() + " = " + channelName + " :" + names + "\r\n");
+        j[i]->sendMessage(":irc.1337.ma 366 " + j[i]->getNick() + " " + channelName + " :End of /NAMES list.\r\n");
+    }
 }
 
 void IrcServer::handelInvite(IrcClient& client, const std::vector<std::string>& args)
@@ -382,7 +456,7 @@ void IrcServer::handelInvite(IrcClient& client, const std::vector<std::string>& 
     target->sendMessage(inviteMsg);
     // confirm
     client.sendMessage("341 " + client.getNick() + " " + targetNick + " " + channelName + "\r\n");
-
+    
 }
 
 void IrcServer::handelKick(IrcClient& client, const std::vector<std::string>& args)
@@ -393,10 +467,11 @@ void IrcServer::handelKick(IrcClient& client, const std::vector<std::string>& ar
         client.sendMessage("461 " + client.getNick() + " KICK :not enough parameters\r\n");
         return;
     }
-    std::string targetNick = args[0];
+    std::cout <<" dfe3\n";
+     std::string targetNick = args[2];
     const std::string channelName = args[1];// KICK nickname #channel
     std::string reason = (args.size() > 2) ? args[2] : client.getNick();
-
+    
     Channel* channel = GetChannel(channelName);
     if(!channel)
     {
@@ -414,23 +489,27 @@ void IrcServer::handelKick(IrcClient& client, const std::vector<std::string>& ar
         return;
     }
     // find target
-    IrcClient* target = findClientByNick(targetNick);
+    IrcClient* target = findClientByNick(args[2]);
     if(!target)
     {
-        client.sendMessage("401 " + client.getNick() + " " + targetNick + " :no such nick\r\n");
-        return;
+            std::cout <<" dfe3 " << args[1] << std::endl;
+            client.sendMessage("401 " + client.getNick() + " " + targetNick + " :no such nick\r\n");
+            return;
     }
+    std::cout <<" dfe3  3\n";
     if (!channel->isMember(target))
     {
         client.sendMessage("441 " + client.getNick() + " " + targetNick + " " + channelName + " :they are not on that channel\r\n");
         return;
     }
     // kick msg
-    std::string host = client.getHost().empty() ? "localhost" : client.getHost();
-    std::string kickMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " KICK " + channelName + " " + targetNick + " :" + reason + "\r\n";
+    //:ChanOp!user@host KICK #python Learner
+    // std::string host = client.getHost().empty() ? "localhost" : client.getHost();
+    std::string host =  "1337.ma";
+    std::string kickMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " KICK " + channelName + " " + targetNick  + "\r\n";
     broadcastToChannel(*channel, kickMsg, NULL);
     channel->removeMember(target);
-
+    
 }
 void IrcServer::handleModes(IrcClient& client, const std::vector<std::string>& args)
 {
@@ -466,6 +545,7 @@ void IrcServer::handleModes(IrcClient& client, const std::vector<std::string>& a
     std::string appliedModes;
     std::string modeParams;
     size_t argIndex = 2;
+    std::cout <<  "mode string -> " << modeString << std::endl;
     for(size_t i = 0; i < modeString.length(); i++)
     {
         char mode = modeString[i];
@@ -513,8 +593,9 @@ void IrcServer::handleMode_i(Channel* channel, bool adding, std::string& applied
 }
 void IrcServer::handleMode_t(Channel* channel, bool adding, std::string& appliedModes)
 {
-    channel->setTopicRestrected(adding);
     appliedModes += adding ? "+t" : "-t";
+    channel->setTopicRestrected(adding);
+    std::cout << "adding is " << adding << std::endl;
 }
 bool IrcServer::handleMode_k(Channel* channel, IrcClient& client, bool adding, std::string& appliedModes, std::string& modeParams, const std::vector<std::string>& args, size_t& argIndex)
 {

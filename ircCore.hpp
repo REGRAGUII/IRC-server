@@ -67,6 +67,7 @@ public:
     int getClient() const;
     void Buffering(const std::string& add);
     void sendMessage(const std::string& msg);
+    void sendMessages(const std::string& msg, IrcClient*targetClient);
     bool ExtractLine(std::string& line);
     void setNick(const std::string& n);
     void setUsername(const std::string& u);
@@ -118,7 +119,7 @@ public:
     void sendToClient(IrcClient& client, const std::string& raw);
     //channel
     Channel* findChannel(const std::string& cname);
-    Channel& getOrCreateChannel(const std::string& cname);
+    Channel& getOrCreateChannel(const std::string& cname, std::string pass, IrcClient &client);
     Channel* GetChannel(const std::string& cname);
     std::map<std::string, Channel>& channels();
     // commandes handler
