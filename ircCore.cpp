@@ -5,13 +5,11 @@
 IrcClient::IrcClient() : client_fd(-1), _passAccepted(false), _registered(false), _host("localhost"){}
 IrcClient::IrcClient(int fd) : client_fd(fd), _passAccepted(false), _registered(false){}
 const std::string& IrcClient::getHost() const {return _host;}
-int IrcClient::getClient() const { return client_fd; }
+int IrcClient::getClient() const {return client_fd; }
 void IrcClient::Buffering(const std::string& add) { _buffer += add;}
 void IrcClient::sendMessages(const std::string& msg, IrcClient*targetClient)
 {
-    //:Nick!user@host PRIVMSG #channel :hello everyone
-    // std::string resp;
-    // resp =  ":" + client->getNick() + "!" + client->getUsername() + "@1337.ma PRIVMSG #ty :" + msg + "\r\n";
+    
     send(targetClient->getClient(), msg.c_str(), msg.size(), 0);
 }
 void IrcClient::sendMessage(const std::string& msg){
@@ -48,10 +46,8 @@ bool IrcClient::isRegistered() const { return _registered; }
 
 void IrcClient::tryAuthenticate()
 {
-    if(!_registered && (hasNick() && hasUser() && hasPass())){
-        // sendMessage("Welcome to IRC Server ");
-        // std::cout << "Welcome to IRC Server " << getUsername() << "\n";
-        _registered = true;};
+    if(!_registered && (hasNick() && hasUser() && hasPass()))
+        _registered = true;
 }
 
 
@@ -69,35 +65,16 @@ void IrcServer::setpassword(std::string pwd) {con_d.setpassword(pwd);}
 void IrcServer::setport(int poort) {con_d.setport(poort);}
 void IrcServer::setsocket(int socket) {sock_d.setsocket_fd(socket);}
 
-// void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude)
-// {
-//     for (size_t i = 0; i < channel.GetMembers().size(); ++i) {
-//         IrcClient* member = channel.GetMembers()[i];
-//         if (member != exclude)
-//             member->sendMessage(msg);
-//     }
-// }
 
 void IrcServer::broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* sender)
 {
-    // Debug: print out the number of members in the channel
-    std::cout << "Broadcasting message to channel with " << channel.GetMembers().size() << " members.\n";
-    std::cout << channel.getNamesList() << std::endl;
-    // std::vector<IrcClient *>::iterator it;
-    // for (it = j.begin(); it != j.end(); ++it){
-        //     std::cout << "wahed\n";
-        // }
     std::vector<IrcClient *> j = channel.GetMembers();
-    for (size_t i = 0; i < j.size(); i++) {
-        std::cout << j[i]->getNick()<< std::endl;
+    for (size_t i = 0; i < j.size(); i++) 
+    {
+        // std::cout << j[i]->getNick()<< std::endl;
         IrcClient* member = j[i];
-        // Debug: print out who is receiving the message
-        std::cout << "Sending message to: " << member->getNick() << "\n";
-    
-        // Don't send the message to the sender
-        if (member != sender) {
+        if (member != sender) 
             member->sendMessages(msg, member);
-        }
     }
 }
 
@@ -204,7 +181,6 @@ void IrcServer::handlePass(IrcClient& client, const std::vector<std::string>& ar
         sendToClient(client, ":ircserv 461 * PASS :Not enough parameters\r\n");
         return;
     }
-    std::cout << "argument :" << args[0] << "\n" << "server :" << getpassword() << "\n";
     if (args[0] == getpassword())
         client.setPassAccepted(true);
     else
@@ -279,16 +255,21 @@ void IrcServer::handlePrivmsg(IrcClient& client, const std::vector<std::string>&
         }
         if (!joined)
             return;
-        std::cout << targetNick[0] << std::endl;
+        // std::cout << targetNick[0] << std::endl;
         //:Nick!user@host PRIVMSG #channel :hello everyone
-        std::string msg = ":" + client.getNick() + "!" + client.getUsername() + "@1337.ma PRIVMSG " + targetNick + " :"+ args[1] + "\r\n";
-        std::cout << msg << std::endl;
+        std::string allArgs;
+        for(std::vector<std::string>::const_iterator it = args.begin(); it < args.end(); it++)
+        {
+            allArgs += *it + " ";
+        }
+        std::string msg = ":" + client.getNick() + "!" + client.getUsername() + "@1337.ma PRIVMSG " + targetNick + " :"+ allArgs + "\r\n";
+        // std::cout << msg << std::endl;
         
         broadcastToChannel(*GetChannel(targetNick), msg, &client);
         return;
     }
     IrcClient *targetClient = findClientByNick(targetNick);
-    if(!targetClient)
+    if(!targetClient || client.getClient() < 0)
     {
         std::string err = "Error: User not found\n";
         send(client.getClient(), err.c_str(), err.size(), 0);

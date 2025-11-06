@@ -37,8 +37,8 @@ cmd ft_parse(const std::string& msg)
     return cmd;
 }
 
-void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT){
-    std::cout<< command.c << std::endl;
+void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT)
+{
     if(command.c== "NICK")
         irc.handleNick(client, command.args);
     else if (command.c == "PASS")
