@@ -62,10 +62,7 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
     else if(client.isRegistered() && command.c == "/send")
         fT.handelSend(irc, client,command.args);
     else if (!client.isRegistered())
-    {
         irc.sendToClient(client, "You are  Not Authentificated : " + command.c +"\n");
-    }
-
     else
         irc.sendToClient(client, "Unknow Command : " + command.c +"\n");
 }

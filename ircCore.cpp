@@ -414,7 +414,6 @@ void IrcServer::handelKick(IrcClient& client, const std::vector<std::string>& ar
         client.sendMessage("461 " + client.getNick() + " KICK :not enough parameters\r\n");
         return;
     }
-    std::cout <<" dfe3\n";
      std::string targetNick = args[2];
     const std::string channelName = args[1];
     std::string reason = (args.size() > 2) ? args[2] : client.getNick();
@@ -439,17 +438,14 @@ void IrcServer::handelKick(IrcClient& client, const std::vector<std::string>& ar
     IrcClient* target = findClientByNick(args[2]);
     if(!target)
     {
-            std::cout <<" dfe3 " << args[1] << std::endl;
             client.sendMessage("401 " + client.getNick() + " " + targetNick + " :no such nick\r\n");
             return;
     }
-    std::cout <<" dfe3  3\n";
     if (!channel->isMember(target))
     {
         client.sendMessage("441 " + client.getNick() + " " + targetNick + " " + channelName + " :they are not on that channel\r\n");
         return;
     }
-
     std::string host =  "1337.ma";
     std::string kickMsg = ":" + client.getNick() + "!" + client.getUsername() + "@" + host + " KICK " + channelName + " " + targetNick  + "\r\n";
     broadcastToChannel(*channel, kickMsg, NULL);
