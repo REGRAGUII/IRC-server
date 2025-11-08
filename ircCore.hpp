@@ -131,6 +131,7 @@ public:
     void handelKick(IrcClient& client, const std::vector<std::string>& args);
     void handelInvite(IrcClient& client, const std::vector<std::string>& args);
     void handelTopic(IrcClient& client, const std::vector<std::string>& args);
+    void handleQuit(IrcClient& client, const std::vector<std::string>& args);
     // modes
     void handleModes(IrcClient& client, const std::vector<std::string>& args);
     void handleMode_i(Channel* channel, bool adding, std::string& appliedModes);

@@ -63,5 +63,6 @@
         "semaphore": "cpp",
         "stop_token": "cpp",
         "thread": "cpp"
-    }
+    },
+    "github.gitAuthentication": true
 }

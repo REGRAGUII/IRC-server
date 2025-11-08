@@ -48,7 +48,7 @@ void run_server_loop(IrcServer& irc)
     server_poll.events = POLLIN;
     fds.push_back(server_poll);
 
-    while (true)
+    while (1)
     {
         int activity = poll(fds.data(), fds.size(), -1);
         if (activity < 0)

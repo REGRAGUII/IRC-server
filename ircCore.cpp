@@ -125,7 +125,14 @@ IrcClient* IrcServer::findClientByNick(const std::string nickName)
 void IrcServer::remove_client(int client_fd)
 {
     std::map<int, IrcClient>::iterator it = clients.find(client_fd);
-    if (it != clients.end()) clients.erase(it);
+    if (it != clients.end()) 
+    {
+        if (client_fd >= 0) {
+            ::shutdown(client_fd, SHUT_RDWR);
+            ::close(client_fd);
+        }
+        clients.erase(it);
+    }
 }
 bool IrcServer::isNickTaken(std::string nick) const
 {
@@ -697,7 +704,36 @@ bool IrcServer::handleMode_l(Channel* channel, IrcClient& client, bool adding, s
 }
 IrcServer::~IrcServer() { delete fT; }
 
+void IrcServer::handleQuit(IrcClient& client, const std::vector<std::string>& args)
+{
+    std::string reason = "Client has quit";
+    if (!args.empty() && !args[0].empty())
+        reason = args[0];
 
+    std::string quitMsg = ":" + client.getNick() + " QUIT :" + reason + "\r\n";
+
+    std::vector<Channel*> joined;
+    std::map<std::string, Channel>::iterator it;
+    for (it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        Channel &ch = it->second;
+        if (ch.isMember(&client))
+            joined.push_back(&ch);
+    }
+
+    for (size_t i = 0; i < joined.size(); ++i)
+    {
+        Channel *ch = joined[i];
+        if (ch)
+        {
+            broadcastToChannel(*ch, quitMsg, &client);
+            ch->removeMember(&client);
+        }
+    }
+
+    int fd = client.getClient();
+    remove_client(fd);
+}
 
 // void IrcServer::handleJoin(IrcClient& client, const std::string& channelName) {
 //     Channel& channel = getOrCreateChannel(channelName);
