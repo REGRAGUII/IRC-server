@@ -71,6 +71,7 @@ void Channel::removeMember(IrcClient* client)
     if(it != _members.end())
         _members.erase(it);
     removeOperator(client);
+    removeInvite(client);
 }
 
 // invite manag
