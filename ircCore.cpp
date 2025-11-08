@@ -226,20 +226,15 @@ void IrcServer::handlePrivmsg(IrcClient& client, const std::vector<std::string>&
                 joined = true;
                 break;
             }
-
         }
         if (!joined)
             return;
-        // std::cout << targetNick[0] << std::endl;
-        //:Nick!user@host PRIVMSG #channel :hello everyone
         std::string allArgs;
         for(std::vector<std::string>::const_iterator it = args.begin(); it < args.end(); it++)
         {
             allArgs += *it + " ";
         }
         std::string msg = ":" + client.getNick() + "!" + client.getUsername() + "@1337.ma PRIVMSG " + targetNick + " :"+ allArgs + "\r\n";
-        // std::cout << msg << std::endl;
-
         broadcastToChannel(*GetChannel(targetNick), msg, &client);
         return;
     }
@@ -311,7 +306,6 @@ void IrcServer::handleJoin(IrcClient& client, const std::vector<std::string>& ar
         client.sendMessage("461 " + client.getNick() + " JOIN :Not a valid channel name \r\n");
         return;
     }
-
     std::string channelName = args[0];
     std::string password = (args.size() > 1) ? args[1] : "";
 
@@ -504,21 +498,21 @@ void IrcServer::handleModes(IrcClient& client, const std::vector<std::string>& a
             adding = true;
         else if(mode == '-')
             adding = false;
-        else if(mode == 'i') // +i/-i invite only
+        else if(mode == 'i')
             handleMode_i(channel, adding, appliedModes);
-        else if(mode == 't') // +t/-t topic restricted
+        else if(mode == 't')
             handleMode_t(channel, adding, appliedModes);
-        else if(mode == 'k') // +k/-k channel password
+        else if(mode == 'k')
         {
             if (!handleMode_k(channel, client, adding, appliedModes, modeParams, args, argIndex))
             continue;
         }
-        else if(mode == 'o') // +o/-o operator privilege
+        else if(mode == 'o')
         {
             if (!handleMode_o(channel, client, adding, appliedModes, modeParams, args, argIndex))
             continue;
         }
-        else if(mode == 'l') // +l/-l User limit
+        else if(mode == 'l')
         {
             if (!handleMode_l(channel, client, adding, appliedModes, modeParams, args, argIndex))
             continue;
