@@ -17,6 +17,8 @@
 #include <map>
 #include "bot.hpp"
 #include "channel.hpp"
+#include <sstream>
+#include "init.hpp"
 
 class fileTransfer;
 struct cmd
