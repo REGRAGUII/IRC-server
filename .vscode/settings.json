@@ -62,7 +62,18 @@
         "set": "cpp",
         "semaphore": "cpp",
         "stop_token": "cpp",
+<<<<<<< HEAD
         "thread": "cpp"
     },
     "github.gitAuthentication": true
+=======
+        "thread": "cpp",
+        "bitset": "cpp",
+        "complex": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "mutex": "cpp",
+        "typeindex": "cpp"
+    }
+>>>>>>> 8304755a70eaa0a3e9e397c10363ce312c42ae80
 }

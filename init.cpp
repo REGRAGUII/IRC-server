@@ -75,6 +75,8 @@ void run_server_loop(IrcServer& irc)
                     if (bytes_received <= 0)
                     {
                         std::cout << "Client disconnected: " << fds[i].fd << "\n";
+                        IrcClient *client = irc.getClient(fds[i].fd);
+                        irc.removeClientFromAllChannels(client);
                         close(fds[i].fd);
                         irc.remove_client(fds[i].fd);
                         fds.erase(fds.begin() + i);
@@ -90,10 +92,10 @@ void run_server_loop(IrcServer& irc)
                             cmd = ft_parse(line);
                             HandleCommand(*client, cmd, irc, irc.getBot(), irc.getFileTransfer());
                         }
+                    }
                 }
             }
         }
     }
-}
 }
 
