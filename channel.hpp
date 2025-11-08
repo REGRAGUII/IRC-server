@@ -14,14 +14,14 @@ class Channel
 private:
     std::string _ChannelName;
     std::string _topic;
-    std::string _key; //  channel password +k
-    int _userLimit;  // max users +l
+    std::string _key;
+    int _userLimit;
     std::vector<IrcClient*> _members;
     std::vector<IrcClient*> _operators;
     std::vector<IrcClient*> _inviteUsers;
     // channels mode
     bool inviteOnly;        // +i mode
-    bool topicRestricted;   // +t mode (only ops can change topic)
+    bool topicRestricted;   // +t mode  only ops can change topic
     bool hasPassword;       // +k mode
     bool hasUserLimit;      // +l mode
 public:

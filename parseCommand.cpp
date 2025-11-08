@@ -39,12 +39,12 @@ cmd ft_parse(const std::string& msg)
 
 void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &bot, fileTransfer &fT)
 {
-    if(command.c== "NICK")
+    if (command.c == "USER")
+        irc.handleUser(client, command.args);
+    else if(command.c== "NICK")
         irc.handleNick(client, command.args);
     else if (command.c == "PASS")
         irc.handlePass(client, command.args);
-    else if (command.c == "USER")
-        irc.handleUser(client, command.args);
     else if (client.isRegistered() && command.c == "PRIVMSG")
         irc.handlePrivmsg(client, command.args);
     else if(client.isRegistered() && command.c == "KICK")
@@ -65,7 +65,7 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
     {
         irc.sendToClient(client, "You are  Not Authentificated : " + command.c +"\n");
     }
-    
+
     else
         irc.sendToClient(client, "Unknow Command : " + command.c +"\n");
 }
