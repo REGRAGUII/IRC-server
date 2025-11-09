@@ -61,8 +61,6 @@ void HandleCommand(IrcClient &client, const cmd &command, IrcServer &irc, Bot &b
         bot.handelBot(irc, client, command.args);
     else if(client.isRegistered() && command.c == "/send")
         fT.handelSend(irc, client,command.args);
-    else if(client.isRegistered() && command.c == "QUIT")
-        irc.handleQuit(client, command.args);
     else if (!client.isRegistered())
         irc.sendToClient(client, "You are  Not Authentificated : " + command.c +"\n");
     else
