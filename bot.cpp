@@ -2,9 +2,10 @@
 #include <ctime>
 #include <sys/socket.h>
 #include <unistd.h>
+
 #include "ircCore.hpp"
 
-Bot::Bot() : botName("BOT")
+Bot::Bot() : botName("BOT") 
 {
     std::srand(std::time(0));
     pattern p1;
@@ -108,7 +109,7 @@ Bot::Bot() : botName("BOT")
     p12.response.push_back("Sometimes taking small steps helps in big decisions. What step can you take?");
     patterns.push_back(p12);
 
-
+    
     pattern p13;
     p13.keywords.push_back("how are you");
     p13.keywords.push_back("how do you feel");
@@ -116,7 +117,7 @@ Bot::Bot() : botName("BOT")
     p13.response.push_back("Doing well! What about you?");
     p13.response.push_back("I’m functioning perfectly today! How are you feeling?");
     patterns.push_back(p13);
-
+    
     pattern p14;
     p14.keywords.push_back("thank");
     p14.keywords.push_back("thanks");
@@ -125,7 +126,7 @@ Bot::Bot() : botName("BOT")
     p14.response.push_back("Happy to help anytime!");
     p14.response.push_back("No problem, glad I could assist!");
     patterns.push_back(p14);
-
+    
     pattern p15;
     p15.keywords.push_back("good bot");
     p15.keywords.push_back("nice");
@@ -134,7 +135,7 @@ Bot::Bot() : botName("BOT")
     p15.response.push_back("Aww, that’s kind of you to say!");
     p15.response.push_back("I’m just doing my job");
     patterns.push_back(p15);
-
+    
     pattern p16;
     p16.keywords.push_back("what are you");
     p16.keywords.push_back("who are you");
@@ -142,7 +143,7 @@ Bot::Bot() : botName("BOT")
     p16.response.push_back("Just a friendly bot here to talk with you!");
     p16.response.push_back("I’m BOT — your little AI companion in this chat.");
     patterns.push_back(p16);
-
+    
     pattern p17;
     p17.keywords.push_back("what can you do");
     p17.keywords.push_back("your abilities");
@@ -150,7 +151,7 @@ Bot::Bot() : botName("BOT")
     p17.response.push_back("Mostly I talk — but I learn from every message!");
     p17.response.push_back("For now I’m all ears, tell me something interesting!");
     patterns.push_back(p17);
-
+    
     pattern p18;
     p18.keywords.push_back("bored");
     p18.keywords.push_back("boring");
@@ -158,7 +159,7 @@ Bot::Bot() : botName("BOT")
     p18.response.push_back("I can chat to keep you company! What’s been boring you?");
     p18.response.push_back("What do you usually do for fun?");
     patterns.push_back(p18);
-
+    
     pattern p19;
     p19.keywords.push_back("tired");
     p19.keywords.push_back("sleepy");
@@ -166,28 +167,28 @@ Bot::Bot() : botName("BOT")
     p19.response.push_back("Maybe a nap will help. Have you been sleeping well?");
     p19.response.push_back("You sound exhausted — want to talk about what’s tiring you?");
     patterns.push_back(p19);
-
+    
     pattern p20;
     p20.keywords.push_back("i think");
     p20.response.push_back("Why do you think that?");
     p20.response.push_back("What makes you believe that?");
     p20.response.push_back("Is that something you’ve thought about often?");
     patterns.push_back(p20);
-
+    
     pattern p21;
     p21.keywords.push_back("because");
     p21.response.push_back("That’s an interesting reason. Can you tell me more?");
     p21.response.push_back("Do you always feel that’s the reason?");
     p21.response.push_back("Sometimes reasons are deeper than they seem — what do you think?");
     patterns.push_back(p21);
-
+    
     pattern p22;
     p22.keywords.push_back("i don’t know");
     p22.response.push_back("That’s okay, sometimes not knowing is part of learning.");
     p22.response.push_back("What do you wish you knew?");
     p22.response.push_back("Maybe talking about it will help you figure it out.");
     patterns.push_back(p22);
-
+    
     pattern p23;
     p23.keywords.push_back("joke");
     p23.keywords.push_back("funny");
@@ -195,7 +196,7 @@ Bot::Bot() : botName("BOT")
     p23.response.push_back("I’m trying to be funny, but I might need an update!");
     p23.response.push_back("Haha! Do you like jokes?");
     patterns.push_back(p23);
-
+    
     pattern p24;
     p24.keywords.push_back("bye");
     p24.keywords.push_back("goodbye");
@@ -213,7 +214,7 @@ bool containWholeWord(const std::string &text , const std::string &word)
 {
     bool startOk = false;
     bool endOk = false;
-
+    
     size_t pos = text.find(word);
     while(pos != std::string::npos)
     {
@@ -258,7 +259,7 @@ void Bot::handelBot(IrcServer &irc, IrcClient &client, const std::vector<std::st
                 return;
             }
         }
-    }
+    }    
     pattern p1;
     p1.response.push_back("Interesting just tell me more");
     p1.response.push_back("emmm i see continue please");
