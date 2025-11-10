@@ -19,7 +19,6 @@ void fileTransfer::handelSend(IrcServer &irc, IrcClient &client, const std::vect
     std::string recipientNick = args[0];
     std::string fileName = args[1];
 
-    // find recipient
     IrcClient *recipient = irc.findClientByNick(recipientNick);
     if (!recipient)
     {
@@ -28,7 +27,6 @@ void fileTransfer::handelSend(IrcServer &irc, IrcClient &client, const std::vect
         return;
     }
 
-    // get local IP (IPv4)
     char hostbuffer[256];
     char *IPbuffer;
     struct hostent *host_entry;
@@ -37,13 +35,10 @@ void fileTransfer::handelSend(IrcServer &irc, IrcClient &client, const std::vect
     IPbuffer = inet_ntoa(*((struct in_addr *)host_entry->h_addr_list[0]));
     std::string localIP = IPbuffer;
 
-    // convert IP to integer bsc (DCC uses numeric form)
     unsigned long ipInt = ntohl(inet_addr(localIP.c_str()));
 
-    // choose random port for DCC connection
-    int port = 5000 + (rand() % 1000); // between 5000 and 6000
+    int port = 5000 + (rand() % 1000);
 
-    // build proper DCC message
     std::ostringstream oss;
     oss << "PRIVMSG " 
         << recipientNick 
@@ -56,7 +51,6 @@ void fileTransfer::handelSend(IrcServer &irc, IrcClient &client, const std::vect
         << " 0\x01\r\n";
 
     send(recipient->getClient(), oss.str().c_str(), oss.str().size(), 0);
-
     std::string msgForSender = "DCC file transfer request sent to " + recipientNick + "\n";
     send(client.getClient(), msgForSender.c_str(), msgForSender.size(), 0);
 }

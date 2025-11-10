@@ -13,8 +13,8 @@ class Bot
 private:
     struct pattern
     {
-        std::vector<std::string> keywords; //  keywords to match
-        std::vector<std::string> response; // and this possible responses
+        std::vector<std::string> keywords;
+        std::vector<std::string> response;
     };
     std::string botName;
     std::vector<pattern> patterns;

@@ -3,7 +3,7 @@
 
 Channel::Channel(): _ChannelName("Default"), _topic("None"){};
 Channel::Channel(std::string name) : _ChannelName(name), _userLimit(0), inviteOnly(false), topicRestricted(true), hasPassword(false), hasUserLimit(false){}
-// getters
+
 const std::string Channel::GetChannelName() const {return this->_ChannelName;}
 const std::string Channel::GetChannelTopic() const {return this->_topic;}
 const std::string Channel::GetChannelKey() const {return this->_key;}
@@ -23,7 +23,6 @@ std::string Channel::getNamesList() const
     return names;
 }
 
-// setters
 void Channel::setTopic(const std::string& newTopic) {_topic = newTopic;}
 void Channel::setKey(const std::string password)
 {
@@ -36,7 +35,6 @@ void Channel::setUserLimit(int limit)
     hasUserLimit = (limit > 0);
 }
 
-// mode setters
 void Channel::setInviteOnly(bool value) { inviteOnly = value;}
 void Channel::setTopicRestrected(bool value){topicRestricted = value;}
 bool Channel::isOperator(IrcClient* client) const { return std::find(_operators.begin(), _operators.end(), client) !=_operators.end();}
@@ -44,7 +42,7 @@ bool Channel::isMember(IrcClient* client) const {return std::find(_members.begin
 bool Channel::isInviteOnly() const { return inviteOnly; }
 bool Channel::isTopicRestrected() const {return topicRestricted;}
 
-// op manag
+
 void Channel::addOperator(IrcClient* client)
 {
     if(!isOperator(client))
@@ -57,7 +55,7 @@ void Channel::removeOperator(IrcClient* client)
         _operators.erase(it);
 }
 
-// memmber manag
+
 void Channel::addMember(IrcClient* client)
 {
     if (!isMember(client))
@@ -74,7 +72,7 @@ void Channel::removeMember(IrcClient* client)
     removeInvite(client);
 }
 
-// invite manag
+
 bool Channel::isInvited(IrcClient* client) { return std::find(_inviteUsers.begin(), _inviteUsers.end(), client) != _inviteUsers.end();}
 void Channel::addInvite(IrcClient* client)
 {

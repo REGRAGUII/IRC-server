@@ -87,6 +87,7 @@ public:
 
 };
 
+
 class IrcServer
 {
 private:
@@ -97,7 +98,6 @@ private:
     Bot bot;
     fileTransfer *fT;
 public:
-    // Connection Data
     IrcServer();
     Bot& getBot();
     fileTransfer& getFileTransfer();
@@ -108,23 +108,23 @@ public:
     void setport(int poort);
     void broadcastToChannel(const Channel& channel, const std::string& msg, IrcClient* exclude);
     ConnectionData& getConnectionData();
-    // Socket Data
+
     int getsocket_fd()const;
     SocketData& getSocketData();
     void setsocket(int socket);
-    // Clients Data
+
     IrcClient* getClient(int id);
     void add_client(int client_fd);
     IrcClient* findClientByNick(const std::string nickName);
     void remove_client(int client_fd);
     bool isNickTaken(std::string nick) const;
     void sendToClient(IrcClient& client, const std::string& raw);
-    //channel
+
     Channel* findChannel(const std::string& cname);
     Channel& getOrCreateChannel(const std::string& cname, std::string pass, IrcClient &client);
     Channel* GetChannel(const std::string& cname);
     std::map<std::string, Channel>& channels();
-    // commandes handler
+
     void handleUser(IrcClient& client, const std::vector<std::string>& args);
     void handlePass(IrcClient& client, const std::vector<std::string>& args);
     void handleNick(IrcClient& client, const std::vector<std::string>& args);
@@ -133,8 +133,7 @@ public:
     void handelKick(IrcClient& client, const std::vector<std::string>& args);
     void handelInvite(IrcClient& client, const std::vector<std::string>& args);
     void handelTopic(IrcClient& client, const std::vector<std::string>& args);
-    void handleQuit(IrcClient& client, const std::vector<std::string>& args);
-    // modes
+
     void handleModes(IrcClient& client, const std::vector<std::string>& args);
     void handleMode_i(Channel* channel, bool adding, std::string& appliedModes);
     void handleMode_t(Channel* channel, bool adding, std::string& appliedModes);
