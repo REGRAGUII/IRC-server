@@ -4,9 +4,22 @@ void ft_init(IrcServer& irc, char **argv)
 {
     irc.setport(atoi(argv[1]));
     irc.setsocket(socket(AF_INET, SOCK_STREAM,0));
+    if(irc.getsocket_fd() < 0)
+    {
+        close(irc.getsocket_fd());
+        throw std::runtime_error("socket failed");
+    }
+    if(fcntl(irc.getsocket_fd(), F_SETFL, O_NONBLOCK) < 0)
+    {
+        close(irc.getsocket_fd());
+        throw std::runtime_error("fcntl failed");
+    }
     int opt = 1;
     if (setsockopt(irc.getsocket_fd(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+    {
+        close(irc.getsocket_fd());
         throw std::runtime_error("setsockopt failed");
+    }
 }
 
 
@@ -32,7 +45,9 @@ int accept_new_client(IrcServer& irc)
     socklen_t client_len = sizeof(client_addr);
     int client_fd = accept(irc.getsocket_fd(),(struct sockaddr *)&client_addr,&client_len);
     if (client_fd < 0)
-        throw std::runtime_error("accept failed");
+    {
+        return -1;
+    }
 
     std::cout << "New client connected: " << client_fd - 3 << "\n";
     irc.add_client(client_fd);
@@ -51,7 +66,7 @@ void run_server_loop(IrcServer& irc)
     while (1)
     {
         int activity = poll(fds.data(), fds.size(), -1);
-        if (activity < 0)
+        if (activity < 0) 
             throw std::runtime_error("poll failed");
 
         for (size_t i = 0; i < fds.size(); i++)
@@ -61,10 +76,20 @@ void run_server_loop(IrcServer& irc)
                 if (fds[i].fd == irc.getsocket_fd())
                 {
                     int client_fd = accept_new_client(irc);
-                    pollfd client_poll;
-                    client_poll.fd = client_fd;
-                    client_poll.events = POLLIN;
-                    fds.push_back(client_poll);
+                    if(client_fd != -1)
+                    {
+                        if(fcntl(irc.getsocket_fd(), F_SETFL, O_NONBLOCK) < 0 || client_fd < 0){
+                            throw std::runtime_error("fcntl failed");
+                        }
+                        pollfd client_poll;
+                        client_poll.fd = client_fd;
+                        client_poll.events = POLLIN;
+                        fds.push_back(client_poll);
+                    }
+                    if(client_fd == -1)
+                    {
+                        std::cout << "failed to create a client " << std::endl;
+                    }
                 }
                 else
                 {

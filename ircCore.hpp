@@ -19,6 +19,7 @@
 #include "channel.hpp"
 #include <sstream>
 #include "init.hpp"
+#include <fcntl.h>
 
 class fileTransfer;
 struct cmd
