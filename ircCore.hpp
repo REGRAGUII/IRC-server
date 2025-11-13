@@ -20,6 +20,8 @@
 #include <sstream>
 #include "init.hpp"
 #include <fcntl.h>
+#include <csignal>
+#
 
 class fileTransfer;
 struct cmd

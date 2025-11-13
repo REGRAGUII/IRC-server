@@ -54,21 +54,37 @@ int accept_new_client(IrcServer& irc)
     return client_fd;
 }
 
+volatile sig_atomic_t g_running = 1;
+
+void handle_sigint(int signum)
+{
+    (void)signum;
+    g_running = 0;
+}
+
 void run_server_loop(IrcServer& irc)
 {
+
+    signal(SIGINT, handle_sigint);
+
     std::vector<pollfd> fds;
     cmd cmd;
     pollfd server_poll;
     server_poll.fd = irc.getsocket_fd();
     server_poll.events = POLLIN;
+    server_poll.revents = 0;
     fds.push_back(server_poll);
 
-    while (1)
+    while (g_running)
     {
         int activity = poll(fds.data(), fds.size(), -1);
-        if (activity < 0) 
+        if (activity < 0)
+        {
+            if (errno == EINTR)
+                continue;
             throw std::runtime_error("poll failed");
-
+        }
+        
         for (size_t i = 0; i < fds.size(); i++)
         {
             if (fds[i].revents & POLLIN)
@@ -78,12 +94,13 @@ void run_server_loop(IrcServer& irc)
                     int client_fd = accept_new_client(irc);
                     if(client_fd != -1)
                     {
-                        if(fcntl(irc.getsocket_fd(), F_SETFL, O_NONBLOCK) < 0 || client_fd < 0){
+                        if(fcntl(irc.getsocket_fd(), F_SETFL, O_NONBLOCK) < 0 ){
                             throw std::runtime_error("fcntl failed");
                         }
                         pollfd client_poll;
                         client_poll.fd = client_fd;
                         client_poll.events = POLLIN;
+                        client_poll.revents = 0;
                         fds.push_back(client_poll);
                     }
                     if(client_fd == -1)
@@ -121,5 +138,13 @@ void run_server_loop(IrcServer& irc)
             }
         }
     }
+    for (size_t i = 0; i < fds.size(); i++)
+    {
+        if (fds[i].fd >= 0)
+            close(fds[i].fd);
+    }
+    fds.clear();
+    throw std::runtime_error("Program quited correctly");
 }
+
 
